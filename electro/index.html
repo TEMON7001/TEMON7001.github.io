@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Расчёт сечения по ПУЭ — калькуляторы электрика</title>
+<meta name="description" content="Подбор сечения кабеля, автомата и УЗО, таблицы ПУЭ, расчёт тока по мощности — офлайн-справочник электрика">
+<meta name="theme-color" content="#f5a623">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <span class="logo">⚡</span>
+    <h1>Расчёт сечения по ПУЭ</h1>
+  </div>
+</header>
+
+<main class="content">
+
+  <section class="tab" id="tab-cable" data-tab="cable">
+    <h2>Сечение кабеля</h2>
+
+    <div class="card">
+      <label class="field-label">Как задать нагрузку</label>
+      <div class="segmented" data-role="load-mode">
+        <button type="button" class="seg-btn active" data-value="current">Ток, А</button>
+        <button type="button" class="seg-btn" data-value="power">Мощность, кВт</button>
+      </div>
+
+      <div data-show="current">
+        <label class="field-label" for="c-current">Расчётный ток нагрузки, А</label>
+        <input type="number" id="c-current" inputmode="decimal" placeholder="напр. 16" min="0" step="0.1">
+      </div>
+
+      <div data-show="power" class="hidden">
+        <label class="field-label" for="c-power">Мощность, кВт</label>
+        <input type="number" id="c-power" inputmode="decimal" placeholder="напр. 5" min="0" step="0.1">
+        <label class="field-label" for="c-phase">Сеть</label>
+        <select id="c-phase">
+          <option value="1">Однофазная, 220 В</option>
+          <option value="3">Трёхфазная, 380 В</option>
+        </select>
+        <label class="field-label" for="c-cosphi">cos φ</label>
+        <input type="number" id="c-cosphi" value="1" min="0.1" max="1" step="0.01">
+        <p class="hint">1 — чисто активная нагрузка (обогрев, лампы накаливания); 0.8–0.95 — двигатели и индуктивная нагрузка</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <label class="field-label" for="c-length">Длина линии, м (в одну сторону)</label>
+      <input type="number" id="c-length" inputmode="decimal" placeholder="напр. 20" min="0" step="0.5">
+
+      <label class="field-label" for="c-material">Материал жилы</label>
+      <select id="c-material">
+        <option value="cu">Медь</option>
+        <option value="al">Алюминий</option>
+      </select>
+
+      <label class="field-label" for="c-install">Способ прокладки</label>
+      <select id="c-install">
+        <option value="open">Открыто (на воздухе)</option>
+        <option value="pipe2">В трубе/гофре, 2 провода</option>
+        <option value="pipe3">В трубе/гофре, 3 провода</option>
+      </select>
+
+      <label class="field-label" for="c-drop">Допустимая потеря напряжения, %</label>
+      <input type="number" id="c-drop" value="5" min="0.5" max="15" step="0.5">
+    </div>
+
+    <div class="card result" id="c-result"></div>
+
+    <p class="disclaimer">Справочные значения по ПУЭ-7, гл. 1.3. Для ответственных объектов и проектной документации проверяйте расчёт у проектировщика.</p>
+  </section>
+
+  <section class="tab hidden" id="tab-breaker" data-tab="breaker">
+    <h2>Автомат и УЗО</h2>
+
+    <div class="card">
+      <label class="field-label" for="b-load">Расчётный ток нагрузки, А</label>
+      <input type="number" id="b-load" inputmode="decimal" placeholder="напр. 16" min="0" step="0.1">
+
+      <label class="field-label" for="b-cable">Допустимый ток кабеля, А</label>
+      <input type="number" id="b-cable" inputmode="decimal" placeholder="напр. 27" min="0" step="0.1">
+      <p class="hint">Возьмите со вкладки «Сечение кабеля», либо из паспорта кабеля</p>
+    </div>
+
+    <div class="card result" id="b-result"></div>
+
+    <div class="card info-card">
+      <p><strong>Характеристика автомата:</strong> C — стандартный выбор для розеток и освещения; B — для чувствительной электроники; D — для мощных двигателей с большим пусковым током.</p>
+      <p><strong>УЗО:</strong> 30 мА — для розеточных групп (защита от поражения током); 10 мА — для линий повышенной опасности (ванная, улица); 100–300 мА — противопожарное, на весь объект/группу.</p>
+    </div>
+
+    <p class="disclaimer">Номинал автомата выбирается между расчётным током нагрузки и допустимым током кабеля (защита кабеля от перегрузки). Итоговый выбор подтверждайте проектным расчётом для ответственных объектов.</p>
+  </section>
+
+  <section class="tab hidden" id="tab-tables" data-tab="tables">
+    <h2>Таблицы ПУЭ</h2>
+
+    <div class="card">
+      <label class="field-label" for="t-material">Материал жилы</label>
+      <select id="t-material">
+        <option value="cu">Медь</option>
+        <option value="al">Алюминий</option>
+      </select>
+
+      <label class="field-label" for="t-install">Способ прокладки</label>
+      <select id="t-install">
+        <option value="open">Открыто (на воздухе)</option>
+        <option value="pipe2">В трубе/гофре, 2 провода</option>
+        <option value="pipe3">В трубе/гофре, 3 провода</option>
+      </select>
+    </div>
+
+    <div class="card">
+      <table class="ref-table" id="t-table"></table>
+    </div>
+
+    <p class="disclaimer">Таблицы 1.3.4 / 1.3.5 ПУЭ-7 (гл. 1.3) для проводов и кабелей с резиновой/ПВХ изоляцией.</p>
+  </section>
+
+  <section class="tab hidden" id="tab-power" data-tab="power">
+    <h2>Ток по мощности</h2>
+
+    <div class="card">
+      <label class="field-label" for="p-power">Мощность, кВт</label>
+      <input type="number" id="p-power" inputmode="decimal" placeholder="напр. 5" min="0" step="0.1">
+
+      <label class="field-label" for="p-phase">Сеть</label>
+      <select id="p-phase">
+        <option value="1">Однофазная, 220 В</option>
+        <option value="3">Трёхфазная, 380 В</option>
+      </select>
+
+      <label class="field-label" for="p-cosphi">cos φ</label>
+      <input type="number" id="p-cosphi" value="1" min="0.1" max="1" step="0.01">
+      <p class="hint">1 — чисто активная нагрузка; 0.8–0.95 — двигатели и индуктивная нагрузка</p>
+    </div>
+
+    <div class="card result" id="p-result"></div>
+  </section>
+
+</main>
+
+<footer class="app-footer">
+  <a href="privacy.html">Политика конфиденциальности</a> · Справочные данные по ПУЭ-7, гл. 1.3
+</footer>
+
+
+<nav class="tabbar">
+  <button class="tab-btn active" data-tab="cable">
+    <span class="tab-icon">🔌</span><span>Кабель</span>
+  </button>
+  <button class="tab-btn" data-tab="breaker">
+    <span class="tab-icon">🛡️</span><span>Автомат</span>
+  </button>
+  <button class="tab-btn" data-tab="tables">
+    <span class="tab-icon">📋</span><span>Таблицы</span>
+  </button>
+  <button class="tab-btn" data-tab="power">
+    <span class="tab-icon">🧮</span><span>Ток</span>
+  </button>
+</nav>
+
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

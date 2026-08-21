@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "ru.temon.electro",
+      "sha256_cert_fingerprints": [
+        "ВСТАВИТЬ_SHA256_ОТПЕЧАТОК_ИЗ_PWABUILDER"
+      ]
+    }
+  }
+]
