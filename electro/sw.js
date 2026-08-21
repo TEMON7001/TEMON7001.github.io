@@ -1,4 +1,4 @@
-const CACHE_NAME = "electro-calc-v6";
+const CACHE_NAME = "electro-calc-v7";
 const ASSETS = [
   "./",
   "./index.html",

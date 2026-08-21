@@ -66,7 +66,7 @@ html, body {
 .content {
   max-width: 640px;
   margin: 0 auto;
-  padding: 0.7rem 0.85rem 5rem;
+  padding: 0.7rem 0.85rem 0.5rem;
 }
 
 .tab.hidden { display: none; }
@@ -250,7 +250,9 @@ input[type="number"]:focus, select:focus {
 .tab-btn.active { color: var(--accent); }
 
 .app-footer {
-  padding: 18px 16px 24px;
+  /* Запас под фиксированный таббар нужен именно здесь: подвал идёт после .content,
+     поэтому отступ у .content оказывался НАД подвалом и не спасал. */
+  padding: 18px 16px calc(5rem + env(safe-area-inset-bottom));
   text-align: center;
   font-size: 0.8rem;
   line-height: 1.5;
