@@ -59,6 +59,15 @@ loadModeButtons.forEach((btn) => {
   });
 });
 
+// Подсказка про cos φ занимает две строки и нужна редко: показываем её
+// только когда значение отличается от 1, чтобы не отодвигать результат вниз.
+const cosphiHint = document.getElementById("c-cosphi-hint");
+function toggleCosphiHint() {
+  const v = parseFloat(document.getElementById("c-cosphi").value);
+  cosphiHint.classList.toggle("hidden", !(isFinite(v) && v !== 1));
+}
+document.getElementById("c-cosphi").addEventListener("input", toggleCosphiHint);
+
 const cIds = ["c-current", "c-power", "c-phase", "c-cosphi", "c-length", "c-material", "c-install", "c-drop"];
 cIds.forEach((id) => document.getElementById(id).addEventListener("input", computeCable));
 cIds.forEach((id) => document.getElementById(id).addEventListener("change", computeCable));
@@ -204,6 +213,7 @@ function computePower() {
 
 // ==== Инициализация ====
 renderTable();
+toggleCosphiHint();
 computeCable();
 computeBreaker();
 computePower();

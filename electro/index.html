@@ -26,42 +26,59 @@
     <h2>Сечение кабеля</h2>
 
     <div class="card">
-      <label class="field-label">Как задать нагрузку</label>
       <div class="segmented" data-role="load-mode">
         <button type="button" class="seg-btn active" data-value="current">Ток, А</button>
         <button type="button" class="seg-btn" data-value="power">Мощность, кВт</button>
       </div>
 
-      <div data-show="current">
-        <label class="field-label" for="c-current">Расчётный ток нагрузки, А</label>
-        <input type="number" id="c-current" inputmode="decimal" placeholder="напр. 16" min="0" step="0.1">
+      <div class="row2">
+        <div data-show="current">
+          <label class="field-label" for="c-current">Расчётный ток, А</label>
+          <input type="number" id="c-current" inputmode="decimal" placeholder="напр. 16" min="0" step="0.1">
+        </div>
+
+        <div data-show="power" class="hidden">
+          <label class="field-label" for="c-power">Мощность, кВт</label>
+          <input type="number" id="c-power" inputmode="decimal" placeholder="напр. 5" min="0" step="0.1">
+        </div>
+
+        <div>
+          <label class="field-label" for="c-length">Длина линии, м</label>
+          <input type="number" id="c-length" inputmode="decimal" placeholder="в одну сторону" min="0" step="0.5">
+        </div>
       </div>
 
-      <div data-show="power" class="hidden">
-        <label class="field-label" for="c-power">Мощность, кВт</label>
-        <input type="number" id="c-power" inputmode="decimal" placeholder="напр. 5" min="0" step="0.1">
+      <div class="row2">
+        <div>
+          <label class="field-label" for="c-phase">Сеть</label>
+          <select id="c-phase">
+            <option value="1">1 фаза, 220 В</option>
+            <option value="3">3 фазы, 380 В</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="field-label" for="c-cosphi">cos φ</label>
+          <input type="number" id="c-cosphi" value="1" min="0.1" max="1" step="0.01">
+        </div>
       </div>
 
-      <label class="field-label" for="c-phase">Сеть</label>
-      <select id="c-phase">
-        <option value="1">Однофазная, 220 В</option>
-        <option value="3">Трёхфазная, 380 В</option>
-      </select>
+      <p class="hint hidden" id="c-cosphi-hint">Ниже 1 — двигатели и индуктивная нагрузка</p>
 
-      <label class="field-label" for="c-cosphi">cos φ</label>
-      <input type="number" id="c-cosphi" value="1" min="0.1" max="1" step="0.01">
-      <p class="hint">1 — чисто активная нагрузка (обогрев, лампы накаливания); 0.8–0.95 — двигатели и индуктивная нагрузка</p>
-    </div>
+      <div class="row2">
+        <div>
+          <label class="field-label" for="c-material">Материал жилы</label>
+          <select id="c-material">
+            <option value="cu">Медь</option>
+            <option value="al">Алюминий</option>
+          </select>
+        </div>
 
-    <div class="card">
-      <label class="field-label" for="c-length">Длина линии, м (в одну сторону)</label>
-      <input type="number" id="c-length" inputmode="decimal" placeholder="напр. 20" min="0" step="0.5">
-
-      <label class="field-label" for="c-material">Материал жилы</label>
-      <select id="c-material">
-        <option value="cu">Медь</option>
-        <option value="al">Алюминий</option>
-      </select>
+        <div>
+          <label class="field-label" for="c-drop">Потеря напряжения, %</label>
+          <input type="number" id="c-drop" value="5" min="0.5" max="15" step="0.5">
+        </div>
+      </div>
 
       <label class="field-label" for="c-install">Способ прокладки</label>
       <select id="c-install">
@@ -69,9 +86,6 @@
         <option value="pipe2">В трубе/гофре, 2 провода</option>
         <option value="pipe3">В трубе/гофре, 3 провода</option>
       </select>
-
-      <label class="field-label" for="c-drop">Допустимая потеря напряжения, %</label>
-      <input type="number" id="c-drop" value="5" min="0.5" max="15" step="0.5">
     </div>
 
     <div class="card result" id="c-result"></div>
@@ -135,8 +149,8 @@
 
       <label class="field-label" for="p-phase">Сеть</label>
       <select id="p-phase">
-        <option value="1">Однофазная, 220 В</option>
-        <option value="3">Трёхфазная, 380 В</option>
+        <option value="1">1 фаза, 220 В</option>
+        <option value="3">3 фазы, 380 В</option>
       </select>
 
       <label class="field-label" for="p-cosphi">cos φ</label>
@@ -150,7 +164,7 @@
 </main>
 
 <footer class="app-footer">
-  <a href="privacy.html">Политика конфиденциальности</a> · Справочные данные по ПУЭ-7, гл. 1.3
+  <a href="mailto:temongelios@gmail.com?subject=%D0%A0%D0%B0%D1%81%D1%87%D1%91%D1%82%20%D1%81%D0%B5%D1%87%D0%B5%D0%BD%D0%B8%D1%8F%20%D0%BF%D0%BE%20%D0%9F%D0%A3%D0%AD%20%E2%80%94%20%D0%BE%D0%B1%D1%80%D0%B0%D1%82%D0%BD%D0%B0%D1%8F%20%D1%81%D0%B2%D1%8F%D0%B7%D1%8C">Написать разработчику</a> · Справочные данные по ПУЭ-7, гл. 1.3
 </footer>
 
 
