@@ -34,9 +34,11 @@ function sectionByAmpacity(table, neededCurrent) {
 // Сечение по допустимой потере напряжения
 function sectionByVoltageDrop({ current, length, material, phase, cosphi, allowedDropVolts }) {
   const rho = RESISTIVITY[material];
+  // ΔU = 2·I·L·ρ·cosφ / S  (однофазная, ток идёт по двум жилам)
+  // ΔU = √3·I·L·ρ·cosφ / S  (трёхфазная)
   const raw =
     phase === 1
-      ? (2 * current * rho * length) / allowedDropVolts
+      ? (2 * current * rho * length * cosphi) / allowedDropVolts
       : (Math.sqrt(3) * current * rho * length * cosphi) / allowedDropVolts;
   const series = SECTION_SERIES[material];
   const rounded = series.find((s) => s >= raw) ?? null;
@@ -68,17 +70,17 @@ function computeCable() {
   const install = document.getElementById("c-install").value;
   const dropPercent = parseFloat(document.getElementById("c-drop").value);
 
-  let current;
-  let phase = 1;
-  let cosphi = 1;
+  // Сеть и cos φ нужны в обоих режимах: даже при вводе тока напрямую от них
+  // зависит допустимая потеря напряжения и формула её расчёта.
+  const phase = parseInt(document.getElementById("c-phase").value, 10);
+  const cosphi = parseFloat(document.getElementById("c-cosphi").value) || 1;
+  const voltage = phase === 1 ? 220 : 380;
 
+  let current;
   if (loadMode === "current") {
     current = parseFloat(document.getElementById("c-current").value);
   } else {
     const power = parseFloat(document.getElementById("c-power").value);
-    phase = parseInt(document.getElementById("c-phase").value, 10);
-    cosphi = parseFloat(document.getElementById("c-cosphi").value) || 1;
-    const voltage = phase === 1 ? 220 : 380;
     current = isFinite(power) ? powerToCurrent(power, voltage, phase, cosphi) : NaN;
   }
 
@@ -87,7 +89,6 @@ function computeCable() {
     return;
   }
 
-  const voltage = phase === 1 ? 220 : 380;
   const allowedDropVolts = (voltage * dropPercent) / 100;
 
   const table = AMPACITY[install][material];
@@ -103,15 +104,21 @@ function computeCable() {
 
   const finalSection = Math.max(byHeat.section, byDrop.rounded);
   const governedBy = byHeat.section >= byDrop.rounded ? "нагрев (допустимый ток)" : "потеря напряжения";
-  const finalAmpacity = table[finalSection] ?? "—";
+  // Сечение по потере напряжения может выйти за верхнюю границу таблицы
+  // (для прокладки в трубе данные ПУЭ заканчиваются на 120 мм²).
+  const finalAmpacityRaw = table[finalSection];
+  const finalAmpacity =
+    finalAmpacityRaw === undefined
+      ? "нет в таблице для этой прокладки"
+      : `${finalAmpacityRaw} А`;
 
   out.innerHTML = `
     <div class="result-headline">${fmt(finalSection, 2)} мм²</div>
     <div class="result-row"><span class="k">Расчётный ток</span><span class="v">${fmt(current)} А</span></div>
     <div class="result-row"><span class="k">По нагреву (табл. ПУЭ)</span><span class="v">${fmt(byHeat.section, 2)} мм² (${byHeat.ampacity} А)</span></div>
     <div class="result-row"><span class="k">По потере напряжения</span><span class="v">${fmt(byDrop.rounded, 2)} мм²</span></div>
-    <div class="result-row"><span class="k">Допустимый ток итог. сечения</span><span class="v">${finalAmpacity} А</span></div>
-    <p class="result-note">Определяющий критерий: ${governedBy}. Материал: ${MATERIAL_LABELS[material]}, прокладка: ${INSTALL_LABELS[install]}.</p>
+    <div class="result-row"><span class="k">Допустимый ток итог. сечения</span><span class="v">${finalAmpacity}</span></div>
+    <p class="result-note">Определяющий критерий: ${governedBy}. Сеть: ${phase === 1 ? "220 В, 1 фаза" : "380 В, 3 фазы"}, cos φ ${fmt(cosphi, 2)}. Материал: ${MATERIAL_LABELS[material]}, прокладка: ${INSTALL_LABELS[install]}.</p>
   `;
 }
 
