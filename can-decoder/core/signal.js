@@ -30,7 +30,7 @@ const EXACT_BITS = 53;
  * @returns {{raw: number, value: number|null, valid: boolean, state: string}}
  */
 export function extract(bytes, spec) {
-  const { startBit, length, order, scale, offset } = normalize(spec);
+  const { startBit, length, order, scale, offset, special } = normalize(spec);
   const data = toBytes(bytes);
 
   const needed = bytesNeeded(startBit, length, order);
@@ -41,7 +41,7 @@ export function extract(bytes, spec) {
   }
 
   const raw = readBits(data, startBit, length, order);
-  const state = stateOf(raw, length);
+  const state = special === "none" ? STATE.OK : stateOf(raw, length);
   const rawNumber = Number(raw);
 
   if (state !== STATE.OK) {
@@ -128,7 +128,11 @@ function normalize(spec) {
     throw new SignalError("offset должен быть числом, получено " + spec.offset);
   }
 
-  return { startBit, length, order, scale, offset };
+  // По умолчанию действуют служебные значения J1939 (FF — нет данных, FE — ошибка).
+  // Для параметров вроде адреса устройства весь диапазон рабочий: special_values: "none".
+  const special = spec.special_values === "none" ? "none" : "standard";
+
+  return { startBit, length, order, scale, offset, special };
 }
 
 function toBytes(bytes) {
@@ -230,6 +234,24 @@ function trim(value) {
 }
 
 /**
+ * Какие биты и байты кадра занимает сигнал.
+ * Нужно валидатору справочника (пересечения сигналов) и экрану «Кадр»
+ * для подсветки: какой байт к какому сигналу относится.
+ * @returns {{bits: number[], bytes: number[], bytesNeeded: number}}
+ */
+export function footprint(spec) {
+  const { startBit, length, order } = normalize(spec);
+  const bits = positions(startBit, length, order);
+  const bytes = [];
+  for (const bit of bits) {
+    const index = bit >> 3;
+    if (!bytes.includes(index)) bytes.push(index);
+  }
+  bytes.sort((a, b) => a - b);
+  return { bits, bytes, bytesNeeded: bytes[bytes.length - 1] + 1 };
+}
+
+/**
  * Диапазон значений, которые сигнал реально может нести.
  * Верх ограничен не разрядностью, а стандартом: для байта FB–FD зарезервированы,
  * FE — ошибка, FF — нет данных, поэтому потолок 8-битного сигнала это FA, а не FF.
@@ -237,11 +259,12 @@ function trim(value) {
  * @returns {{min: number, max: number, rawMax: number}}
  */
 export function range(spec) {
-  const { length, scale, offset } = normalize(spec);
+  const { length, scale, offset, special } = normalize(spec);
   const ones = allOnes(length);
 
   let rawMax;
-  if (length === 1) rawMax = ones;
+  if (special === "none") rawMax = ones; // служебных значений нет, рабочий весь диапазон
+  else if (length === 1) rawMax = ones;
   else if (length === 2) rawMax = ones - 2n; // 10 — ошибка, 11 — нет данных
   else if (length <= 8) rawMax = ones - 5n; // FB–FD зарезервированы
   else rawMax = (0xfan << BigInt(length - 8)) | allOnes(length - 8);
