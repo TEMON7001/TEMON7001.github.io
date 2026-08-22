@@ -282,8 +282,29 @@ input:focus, select:focus, textarea:focus {
 
 .key:active { background: var(--bg); }
 
-.history { margin-top: 0.7rem; display: flex; flex-wrap: wrap; gap: 0.35rem; }
-.history-title { width: 100%; font-size: 0.75rem; color: var(--text-dim); }
+/* История: подписи сообщений повторяются (EEC1 идёт десятками в секунду),
+   поэтому запись занимает строку целиком и показывает сам кадр. */
+.history { margin-top: 0.7rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.history-title { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.1rem; }
+
+.history-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.4rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.hi-name { font-size: 0.78rem; color: var(--text-dim); }
+.hi-frame { font-size: 0.85rem; }
 
 .card-title {
   font-size: 0.8rem;

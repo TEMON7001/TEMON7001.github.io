@@ -87,7 +87,7 @@ async function paste() {
     if (text) setText(text.trim());
   } catch {
     // Браузер не дал доступ к буферу — не беда, вставить можно долгим нажатием по полю.
-    note("Браузер не дал доступ к буферу обмена. Вставьте долгим нажатием по полю ввода.");
+    note("Доступ к буферу обмена не предоставлен. Используйте вставку долгим нажатием по полю ввода.");
   }
 }
 
@@ -108,15 +108,16 @@ function buildKeypad() {
   }
   html += "</div>" +
     '<div class="keys keys-wide">' +
-      '<button type="button" class="key" data-key=" ">пробел</button>' +
+      '<button type="button" class="key" data-key=" ">Пробел</button>' +
       '<button type="button" class="key" data-key="\\b">⌫</button>' +
-      '<button type="button" class="key" data-key="">очистить</button>' +
+      '<button type="button" class="key" data-key="">Очистить</button>' +
     "</div>";
   keypad.innerHTML = html;
 
-  // Не даём полю потерять фокус: иначе на телефоне каретка прыгает и клавиатура закрывается.
+  // Отменять touchstart нельзя: в Chrome на Android это отменяет и последующий клик,
+  // и клавиатура перестаёт работать с телефона. Гасим только мышиное нажатие —
+  // чтобы поле не теряло фокус на настольном браузере.
   keypad.addEventListener("mousedown", (event) => event.preventDefault());
-  keypad.addEventListener("touchstart", (event) => event.preventDefault(), { passive: false });
 
   keypad.addEventListener("click", (event) => {
     const button = event.target.closest("button[data-key]");
@@ -126,6 +127,10 @@ function buildKeypad() {
     else if (key === "\\b") input.value = input.value.slice(0, -1);
     else input.value += key;
     render(true);
+    // Системная клавиатура при inputmode="none" не появляется, поэтому фокус
+    // возвращаем безопасно: видно, куда идёт ввод.
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
   });
 }
 
@@ -141,11 +146,12 @@ function renderHistory() {
   historyBox.innerHTML =
     '<div class="history-title">Последние кадры</div>' +
     history
-      .slice(0, 8)
+      .slice(0, 5)
       .map(
         (item) =>
-          '<button type="button" class="chip mono" data-frame="' + escape(item.text) + '">' +
-          escape(item.label || item.text) +
+          '<button type="button" class="history-item" data-frame="' + escape(item.text) + '">' +
+          '<span class="hi-name">' + escape(item.label || "Кадр") + "</span>" +
+          '<span class="hi-frame mono">' + escape(shorten(item.text)) + "</span>" +
           "</button>"
       )
       .join("");
@@ -205,17 +211,17 @@ function render(fromUser) {
   wireHighlight();
 
   if (frame.dlc > 0) {
-    scheduleSave(text, (result.message ? result.message.acronym || result.message.name : "PGN " + result.id.pgn));
+    scheduleSave(text, describe(result));
   }
 }
 
 function hint() {
   return (
     '<div class="card">' +
-      '<p class="lead">Вставьте кадр или наберите его на клавиатуре ниже.</p>' +
-      '<p class="hint">Понимаются любые записи: <span class="mono">18F00400FFFF8200</span>, ' +
+      '<p class="lead">Введите кадр вручную или вставьте из буфера обмена.</p>' +
+      '<p class="hint">Допустимые форматы записи: <span class="mono">18F00400FFFF8200</span>, ' +
       '<span class="mono">18F00400 FF FF 82 00</span>, <span class="mono">0x18F00400#FFFF8200</span>. ' +
-      "Строку целиком из лога разберёт экран «Лог».</p>" +
+      "Для разбора файлов лога предназначен экран «Лог».</p>" +
     "</div>"
   );
 }
@@ -254,8 +260,8 @@ function messageCard(result) {
     return (
       '<div class="card card-unknown">' +
         "<p><strong>PGN не распознан</strong></p>" +
-        '<p class="hint">Этого номера нет в справочнике, поэтому значений не показываем — ' +
-        "выдумывать их нельзя. Сырые байты ниже.</p>" +
+        '<p class="hint">Номер отсутствует в справочнике. Значения параметров не выводятся, ' +
+        "ниже показаны байты кадра в исходном виде.</p>" +
       "</div>"
     );
   }
@@ -268,7 +274,7 @@ function messageCard(result) {
   let extra = "";
   if (result.kind === KIND.SERVICE) {
     extra =
-      '<p class="hint">Служебное сообщение: узнаём и подписываем, содержимое в MVP не разбираем.' +
+      '<p class="hint">Служебное сообщение. Содержимое кадра не разбирается.' +
       (message.note ? " " + escape(message.note) : "") +
       "</p>";
   } else {
@@ -309,7 +315,7 @@ function signalsCard(result) {
 
 function valueHtml(signal) {
   if (signal.state === STATE.NOT_AVAILABLE) {
-    return '<span class="dim">нет данных</span>';
+    return '<span class="dim">данные недоступны</span>';
   }
   if (signal.state === STATE.ERROR) {
     return '<span class="warn">ошибка датчика</span>';
@@ -328,7 +334,7 @@ function valueHtml(signal) {
 function bytesCard(result) {
   const bytes = result.frame.bytes;
   if (!bytes.length) {
-    return '<div class="card"><p class="hint">В кадре только идентификатор, данных нет.</p></div>';
+    return '<div class="card"><p class="hint">Кадр содержит только идентификатор, байты данных отсутствуют.</p></div>';
   }
 
   const order = new Map();
@@ -356,8 +362,8 @@ function bytesCard(result) {
     '<div class="card">' +
       '<div class="card-title">Байты <small>' + escape(bytesToHex(bytes)) + "</small></div>" +
       '<div class="bytes">' + cells + "</div>" +
-      '<p class="hint">Нумерация байт как в документации J1939 — с единицы. ' +
-      "Нажмите байт, чтобы увидеть его сигналы.</p>" +
+      '<p class="hint">Нумерация байтов по документации J1939, с единицы. ' +
+      "Нажатие на байт выделяет связанные параметры.</p>" +
     "</div>"
   );
 }
@@ -369,9 +375,9 @@ function skippedCard(result) {
     .join("");
   return (
     '<div class="card card-unknown">' +
-      "<p><strong>Не поместились в кадр</strong></p>" +
+      "<p><strong>Параметры вне длины кадра</strong></p>" +
       '<ul class="stub-list">' + items + "</ul>" +
-      '<p class="hint">Кадр короче, чем сообщение в справочнике: эти сигналы разобрать не из чего.</p>' +
+      '<p class="hint">Кадр короче сообщения из справочника, данных для этих параметров нет.</p>' +
     "</div>"
   );
 }
@@ -414,6 +420,25 @@ function wireHighlight() {
 }
 
 // ==== Мелочи ====
+
+// Подпись записи в истории. Один акроним не различает посылки: EEC1 приходит десятками
+// в секунду с разными данными, поэтому под подписью показываем саму строку кадра.
+function describe(result) {
+  if (!result.message) return "PGN " + result.id.pgn;
+  const name = result.message.acronym || result.message.name;
+  return name + " · PGN " + result.id.pgn;
+}
+
+// Кадр целиком в узкую строку не помещается: оставляем идентификатор и начало данных.
+function shorten(text) {
+  const parts = text.trim().toUpperCase().replace(/[#]/g, " ").split(/\s+/).filter(Boolean);
+  if (parts.length === 1) {
+    // Слитная запись: режем по длине, иначе строка вылезет за карточку.
+    return parts[0].length > 20 ? parts[0].slice(0, 20) + "…" : parts[0];
+  }
+  if (parts.length <= 4) return parts.join(" ");
+  return parts.slice(0, 4).join(" ") + "…";
+}
 
 function format(value) {
   if (value === null) return "—";

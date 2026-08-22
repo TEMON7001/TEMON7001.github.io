@@ -8,6 +8,5 @@ export function stub(root, { title, lead, points, task }) {
       '<p class="lead">' + lead + "</p>" +
       '<ul class="stub-list">' + list + "</ul>" +
     "</div>" +
-    '<p class="disclaimer">Экран в разработке, задача ' + task + ". " +
-    "Каркас, переключение экранов и офлайн-режим уже работают.</p>";
+    '<p class="disclaimer">Экран в разработке, задача ' + task + ".</p>";
 }

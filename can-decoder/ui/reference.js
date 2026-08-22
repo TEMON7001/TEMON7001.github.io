@@ -5,7 +5,7 @@ export const meta = { id: "reference", title: "Справочник", short: "С
 export function mount(root) {
   stub(root, {
     title: "Справочник",
-    lead: "Один поиск по всему справочнику, работает по неполному вводу.",
+    lead: "Единый поиск по справочнику, в том числе по неполному запросу.",
     points: [
       "Номер PGN в десятичном и hex виде: 61444, F004",
       "Acronym и название: EEC1, «оборот»",

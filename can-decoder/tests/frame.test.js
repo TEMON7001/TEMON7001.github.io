@@ -63,23 +63,23 @@ test("полный кадр из контрольных примеров: 0CF004
 
 suite("core/frame.js — ошибки");
 
-test("пустой ввод", () => throwsWith(() => parseFrame(""), "пустой ввод"));
-test("только пробелы — тоже пустой ввод", () => throwsWith(() => parseFrame("   \t "), "пустой ввод"));
-test("не строка вовсе", () => throwsWith(() => parseFrame(null), "пустой ввод"));
+test("введите кадр", () => throwsWith(() => parseFrame(""), "введите кадр"));
+test("только пробелы — тоже пустой ввод", () => throwsWith(() => parseFrame("   \t "), "введите кадр"));
+test("не строка вовсе", () => throwsWith(() => parseFrame(null), "введите кадр"));
 
 test("недопустимый символ", () => throwsWith(() => parseFrame("18FEE000 FF G0"), "недопустимый символ"));
 test("недопустимый символ в идентификаторе", () => throwsWith(() => parseFrame("18ZE0000 FF"), "недопустимый символ"));
 
-test("не хватает половины байта", () => throwsWith(() => parseFrame("18FEE000 FF F"), "не хватает"));
+test("не хватает половины байта", () => throwsWith(() => parseFrame("18FEE000 FF F"), "незавершённый байт"));
 test("нечётная слитная запись длиннее идентификатора", () =>
-  throwsWith(() => parseFrame("18FEE000FFF"), "не хватает"));
+  throwsWith(() => parseFrame("18FEE000FFF"), "незавершённый байт"));
 
-test("слишком короткий ввод", () => throwsWith(() => parseFrame("1F"), "слишком короткий"));
+test("слишком короткий ввод", () => throwsWith(() => parseFrame("1F"), "недостаточная длина"));
 test("больше 8 байт", () =>
-  throwsWith(() => parseFrame("18FEE000 00 01 02 03 04 05 06 07 08"), "не больше 8"));
+  throwsWith(() => parseFrame("18FEE000 00 01 02 03 04 05 06 07 08"), "не более 8"));
 test("идентификатор длиннее 8 цифр", () =>
-  throwsWith(() => parseFrame("118FEE000#FF"), "длиннее 8"));
-test("два знака #", () => throwsWith(() => parseFrame("18FEE000#FF#00"), "больше одного знака"));
+  throwsWith(() => parseFrame("118FEE000#FF"), "не более 8"));
+test("два знака #", () => throwsWith(() => parseFrame("18FEE000#FF#00"), "более одного раза"));
 
 test("ошибка — это FrameError, а не общий Error", () => {
   let caught = null;
@@ -92,11 +92,11 @@ test("ошибка — это FrameError, а не общий Error", () => {
 });
 
 test("строка из лога candump — подсказка про экран «Лог»", () =>
-  throwsWith(() => parseFrame("can0  18FEE000   [8]  FF FF 82 00 00 00 00 00"), "похоже на строку из лога"));
+  throwsWith(() => parseFrame("can0  18FEE000   [8]  FF FF 82 00 00 00 00 00"), "строка из файла лога"));
 test("строка с меткой времени — тоже подсказка", () =>
-  throwsWith(() => parseFrame("(1755859200.123456) can0 18FEE000#FFFF8200"), "похоже на строку из лога"));
+  throwsWith(() => parseFrame("(1755859200.123456) can0 18FEE000#FFFF8200"), "строка из файла лога"));
 test("длина в скобках без интерфейса — подсказка", () =>
-  throwsWith(() => parseFrame("18FEE000 [8] FF FF 82 00"), "похоже на строку из лога"));
+  throwsWith(() => parseFrame("18FEE000 [8] FF FF 82 00"), "строка из файла лога"));
 test("буквы A–F в данных подсказку не вызывают", () => {
   const frame = parseFrame("18FEE000 FF00 82 00");
   eq(frame.dlc, 4, "dlc");

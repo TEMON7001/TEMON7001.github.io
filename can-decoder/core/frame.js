@@ -26,7 +26,7 @@ const SEPARATORS = /[\s,;:\-.|_]+/;
  */
 export function parseFrame(input) {
   if (typeof input !== "string" || input.trim() === "") {
-    throw new FrameError("Пустой ввод: вставьте кадр, например 18FEE000 FF FF 82 00");
+    throw new FrameError("Введите кадр, например 18F00400 FF A5 A7 E0 2E FF FF FF");
   }
 
   const text = input.trim().toUpperCase();
@@ -35,8 +35,8 @@ export function parseFrame(input) {
   // экрана «Лог», — но и молчаливое «недопустимый символ» пользователю ничего не объясняет.
   if (looksLikeLogLine(text)) {
     throw new FrameError(
-      "Похоже на строку из лога: экран «Лог» разберёт её целиком. " +
-        "Сюда вставьте только идентификатор и байты, например 18FEE000 FF FF 82 00"
+      "Строка из файла лога. Для разбора логов предназначен экран «Лог»: " +
+        "в это поле вводятся идентификатор и байты данных, например 18F00400 FF A5 A7 E0 2E FF FF FF"
     );
   }
   const hash = text.indexOf("#");
@@ -47,14 +47,14 @@ export function parseFrame(input) {
   if (hash !== -1) {
     // Формат candump: слева от # идентификатор, справа данные.
     if (text.indexOf("#", hash + 1) !== -1) {
-      throw new FrameError("В кадре больше одного знака #");
+      throw new FrameError("Недопустимая запись: знак # встречается более одного раза");
     }
     idHex = joinHex(text.slice(0, hash));
     dataHex = joinHex(text.slice(hash + 1));
   } else {
     const tokens = text.split(SEPARATORS).filter(Boolean).map(stripPrefix);
     if (tokens.length === 0) {
-      throw new FrameError("Пустой ввод: вставьте кадр, например 18FEE000 FF FF 82 00");
+      throw new FrameError("Введите кадр, например 18F00400 FF A5 A7 E0 2E FF FF FF");
     }
     if (tokens.length === 1) {
       // Слитная запись: разделителей нет, границу ищем по длине.
@@ -66,7 +66,7 @@ export function parseFrame(input) {
       checkHex(one);
       if (one.length < 3) {
         throw new FrameError(
-          "Слишком короткий ввод: идентификатор — это минимум три hex-цифры"
+          "Недостаточная длина: идентификатор содержит не менее трёх hex-цифр"
         );
       }
       const idLength = one.length % 2 === 0 ? Math.min(one.length, 8) : one.length < 8 ? 3 : 8;
@@ -86,11 +86,12 @@ function build(idHex, dataHex) {
   checkHex(dataHex);
 
   if (idHex.length === 0) {
-    throw new FrameError("Не указан идентификатор кадра");
+    throw new FrameError("Идентификатор кадра не указан");
   }
   if (idHex.length > 8) {
     throw new FrameError(
-      "Идентификатор длиннее 8 hex-цифр: " + idHex.length + " — столько в CAN не бывает"
+      "Идентификатор содержит " + idHex.length + " " + plural(idHex.length, "hex-цифру", "hex-цифры", "hex-цифр") +
+        ", допустимо не более 8"
     );
   }
 
@@ -104,14 +105,16 @@ function build(idHex, dataHex) {
 
   if (dataHex.length % 2 !== 0) {
     throw new FrameError(
-      "Не хватает половины байта: в данных " + dataHex.length + " hex-цифр, нужно чётное число"
+      "Незавершённый байт: в данных " + dataHex.length + " " +
+        plural(dataHex.length, "hex-цифра", "hex-цифры", "hex-цифр") + ", требуется чётное количество"
     );
   }
 
   const dlc = dataHex.length / 2;
   if (dlc > MAX_BYTES) {
     throw new FrameError(
-      "В кадре " + dlc + " байт, а в классическом CAN их не больше " + MAX_BYTES
+      "Длина данных " + dlc + " " + plural(dlc, "байт", "байта", "байт") +
+        ", для классического CAN допустимо не более " + MAX_BYTES
     );
   }
 
@@ -150,11 +153,20 @@ function stripPrefix(token) {
   return token.startsWith("0X") ? token.slice(2) : token;
 }
 
+// Числительные в сообщениях пользователю: «3 hex-цифры», а не «3 hex-цифр».
+function plural(count, one, few, many) {
+  const tens = count % 100;
+  const units = count % 10;
+  if (units === 1 && tens !== 11) return one;
+  if (units >= 2 && units <= 4 && (tens < 12 || tens > 14)) return few;
+  return many;
+}
+
 function checkHex(hex) {
   const bad = hex.match(/[^0-9A-F]/);
   if (bad) {
     throw new FrameError(
-      "Недопустимый символ «" + bad[0] + "»: в кадре только цифры 0–9 и буквы A–F"
+      "Недопустимый символ «" + bad[0] + "». Допускаются цифры 0–9 и буквы A–F"
     );
   }
 }
