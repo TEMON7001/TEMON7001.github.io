@@ -1,6 +1,6 @@
 // Приложение обязано полностью работать в поле без сети: механик стоит у машины,
 // интернета нет. Поэтому кэшируем всю оболочку сразу при установке, включая JSON-справочники.
-const CACHE_NAME = "can-decoder-v1";
+const CACHE_NAME = "can-decoder-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -33,26 +33,39 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// Оболочка отдаётся из кэша сразу, остальное (тесты, будущие файлы) — сначала из сети:
+// иначе при разработке страница месяцами живёт на старой версии файла и это не видно.
+const PRECACHED = new Set(ASSETS.map((path) => new URL(path, self.registration.scope).pathname));
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
+
+  const isShell = PRECACHED.has(new URL(req.url).pathname);
+
   event.respondWith(
-    caches.match(req).then((cached) => {
-      if (cached) return cached;
-      return fetch(req)
-        .then((response) => {
-          if (response && response.ok && response.type === "basic") {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
-          }
-          return response;
-        })
-        .catch(() => {
-          // Офлайн и в кэше пусто: для навигации отдаём оболочку,
-          // для остального — честную сетевую ошибку.
-          if (req.mode !== "navigate") return Response.error();
-          return caches.match("./index.html").then((shell) => shell || Response.error());
-        });
-    })
+    (isShell ? fromCacheFirst(req) : fromNetworkFirst(req)).catch(() => fallback(req))
   );
 });
+
+function fromCacheFirst(req) {
+  return caches.match(req).then((cached) => cached || fromNetworkFirst(req));
+}
+
+function fromNetworkFirst(req) {
+  return fetch(req)
+    .then((response) => {
+      if (response && response.ok && response.type === "basic") {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+      }
+      return response;
+    })
+    .catch(() => caches.match(req).then((cached) => cached || Promise.reject(new Error("нет сети и нет кэша"))));
+}
+
+// Офлайн и в кэше пусто: для навигации отдаём оболочку, для остального — честную ошибку.
+function fallback(req) {
+  if (req.mode !== "navigate") return Response.error();
+  return caches.match("./index.html").then((shell) => shell || Response.error());
+}
