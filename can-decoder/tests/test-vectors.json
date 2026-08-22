@@ -1,0 +1,95 @@
+{
+  "format_version": 1,
+  "note": "Контрольные примеры для тестов. Значения посчитаны по seed-справочнику, не по реальной машине.",
+  "vectors": [
+    {
+      "name": "EEC1: обороты 1500, момент 42%",
+      "id": "0CF00400",
+      "data": "FF A5 A7 E0 2E FF FF FF",
+      "expect": {
+        "pgn": 61444,
+        "priority": 3,
+        "sa": 0,
+        "pdu": "PDU2",
+        "signals": {
+          "190": 1500.0,
+          "513": 42,
+          "512": 40
+        }
+      }
+    },
+    {
+      "name": "ET1: ОЖ 85 °C, топливо 30 °C",
+      "id": "18FEEE00",
+      "data": "7D 46 FF FF FF FF FF FF",
+      "expect": {
+        "pgn": 65262,
+        "priority": 6,
+        "sa": 0,
+        "pdu": "PDU2",
+        "signals": {
+          "110": 85,
+          "174": 30
+        }
+      }
+    },
+    {
+      "name": "CCVS: скорость 60 км/ч, круиз 90",
+      "id": "18FEF100",
+      "data": "FF 00 3C FF FF 5A FF FF",
+      "expect": {
+        "pgn": 65265,
+        "priority": 6,
+        "sa": 0,
+        "pdu": "PDU2",
+        "signals": {
+          "84": 60.0,
+          "86": 90
+        }
+      }
+    },
+    {
+      "name": "ET1: все байты FF — данные недоступны",
+      "id": "18FEEE00",
+      "data": "FF FF FF FF FF FF FF FF",
+      "expect": {
+        "pgn": 65262,
+        "signals_state": "not_available"
+      }
+    },
+    {
+      "name": "DM1: SPN 190 / FMI 3, счётчик 2, горит красная лампа",
+      "id": "18FECA00",
+      "data": "10 FF BE 00 03 02 FF FF",
+      "expect": {
+        "pgn": 65226,
+        "lamps": {
+          "red_stop": "включена",
+          "amber": "выключена",
+          "mil": "выключена",
+          "protect": "выключена"
+        },
+        "dtc": [
+          {
+            "spn": 190,
+            "fmi": 3,
+            "occurrence": 2,
+            "cm": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "Адресуемый кадр PDU1: запрос PGN 65253 к адресу 0",
+      "id": "18EA00F9",
+      "data": "E5 FE 00",
+      "expect": {
+        "pgn": 59904,
+        "pdu": "PDU1",
+        "da": 0,
+        "sa": 249,
+        "requested_pgn": 65253
+      }
+    }
+  ]
+}
