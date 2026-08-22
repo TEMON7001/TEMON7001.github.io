@@ -181,6 +181,20 @@ render(currentId());
 
 // ==== Офлайн ====
 if ("serviceWorker" in navigator) {
+  // Оболочка отдаётся из кэша, поэтому после обновления первая загрузка показывает
+  // ещё старую версию, а новый воркер встаёт только следом. Чтобы человек не видел
+  // вчерашнее приложение и не гадал, перезагружаем страницу один раз, когда
+  // управление перешло к новому воркеру.
+  // Первая в жизни установка тоже меняет управление, но там перезагружать нечего:
+  // страница уже свежая. Поэтому смотрим, был ли воркер до неё.
+  const hadController = Boolean(navigator.serviceWorker.controller);
+  let reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloading || !hadController) return;
+    reloading = true;
+    location.reload();
+  });
+
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   });
