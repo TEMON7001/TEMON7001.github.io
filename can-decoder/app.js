@@ -1,6 +1,9 @@
 // Точка входа: роутинг между экранами, общее состояние, localStorage.
 // Экраны лежат в ui/ и ничего не знают друг о друге — связывает их только этот файл.
 
+import { loadCatalog, isDevHost } from "./core/catalog.js";
+import { j1939 } from "./protocols/j1939/index.js";
+
 import * as frame from "./ui/frame.js";
 import * as log from "./ui/log.js";
 import * as reverse from "./ui/reverse.js";
@@ -44,12 +47,22 @@ export const store = {
   },
 };
 
-// История разобранных кадров: последние HISTORY_LIMIT, свежие сверху, без дублей подряд.
+// История разобранных кадров: последние HISTORY_LIMIT, свежие сверху, без дублей.
 export function pushHistory(entry) {
   const history = store.get("history", []).filter((h) => h.text !== entry.text);
+  // Кадр набирают слева направо, поэтому недописанный вариант — это тот же кадр,
+  // а не отдельная запись: заменяем его целиком.
+  while (history.length && startsWith(entry.text, history[0].text)) history.shift();
   history.unshift({ ...entry, at: Date.now() });
   store.set("history", history.slice(0, HISTORY_LIMIT));
   return history;
+}
+
+function startsWith(text, prefix) {
+  const clean = (value) => value.replace(/[^0-9a-fA-F]/g, "").toUpperCase();
+  const full = clean(text);
+  const start = clean(prefix);
+  return start.length > 0 && full.startsWith(start);
 }
 
 export function getHistory() {
@@ -95,7 +108,30 @@ export function go(id) {
   location.hash = "#/" + id;
 }
 
-const ctx = { store, go, pushHistory, getHistory, toggleFavorite, getFavorites };
+// Справочник грузим до первой отрисовки: без него экраны показывать нечего,
+// а лежит он рядом и закэширован service worker'ом.
+// Строгая проверка данных — только при разработке: на телефоне у пользователя
+// падать из-за одной кривой строчки в справочнике нельзя.
+let catalog = null;
+let catalogError = null;
+try {
+  catalog = await loadCatalog(j1939.catalogUrl, { strict: isDevHost() });
+} catch (error) {
+  catalogError = error;
+  console.error(error);
+}
+
+const ctx = {
+  store,
+  go,
+  pushHistory,
+  getHistory,
+  toggleFavorite,
+  getFavorites,
+  catalog,
+  catalogError,
+  protocol: j1939,
+};
 
 function render(id) {
   const screen = screenById(id);

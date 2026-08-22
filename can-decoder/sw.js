@@ -1,12 +1,18 @@
 // Приложение обязано полностью работать в поле без сети: механик стоит у машины,
 // интернета нет. Поэтому кэшируем всю оболочку сразу при установке, включая JSON-справочники.
-const CACHE_NAME = "can-decoder-v2";
+const CACHE_NAME = "can-decoder-v5";
 const ASSETS = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./manifest.json",
+  "./core/frame.js",
+  "./core/signal.js",
+  "./core/catalog.js",
+  "./core/resolve.js",
+  "./protocols/j1939/id.js",
+  "./protocols/j1939/index.js",
   "./ui/_stub.js",
   "./ui/frame.js",
   "./ui/log.js",
@@ -37,11 +43,15 @@ self.addEventListener("activate", (event) => {
 // иначе при разработке страница месяцами живёт на старой версии файла и это не видно.
 const PRECACHED = new Set(ASSETS.map((path) => new URL(path, self.registration.scope).pathname));
 
+// При разработке отдавать оболочку из кэша нельзя: правка в файле не видна,
+// пока не сбросишь кэш вручную. На localhost всё идёт из сети, кэш остаётся запасным.
+const DEV = ["localhost", "127.0.0.1"].includes(self.location.hostname);
+
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
 
-  const isShell = PRECACHED.has(new URL(req.url).pathname);
+  const isShell = !DEV && PRECACHED.has(new URL(req.url).pathname);
 
   event.respondWith(
     (isShell ? fromCacheFirst(req) : fromNetworkFirst(req)).catch(() => fallback(req))
@@ -53,7 +63,11 @@ function fromCacheFirst(req) {
 }
 
 function fromNetworkFirst(req) {
-  return fetch(req)
+  // Локальный сервер разработки не присылает заголовков кэширования, и Chrome решает
+  // сам, сколько файл «свежий». В разработке это выглядит как «правка не применилась»,
+  // поэтому там ходим в сеть принудительно.
+  const request = DEV ? new Request(req.url, { cache: "reload" }) : req;
+  return fetch(request)
     .then((response) => {
       if (response && response.ok && response.type === "basic") {
         const copy = response.clone();

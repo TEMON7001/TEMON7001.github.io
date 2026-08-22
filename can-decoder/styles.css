@@ -11,6 +11,16 @@
   --border: #e0e4ea;
   --tabbar-bg: #ffffff;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Цвета сигналов: связывают строку в таблице с байтами в раскладке. */
+  --sig-1: #0369a1;
+  --sig-2: #b45309;
+  --sig-3: #15803d;
+  --sig-4: #7e22ce;
+  --sig-5: #be123c;
+  --sig-6: #0f766e;
+  --sig-7: #a16207;
+  --sig-8: #4338ca;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -26,6 +36,15 @@
     --success: #3ddc84;
     --border: #253242;
     --tabbar-bg: #111a24;
+
+    --sig-1: #38bdf8;
+    --sig-2: #fbbf24;
+    --sig-3: #4ade80;
+    --sig-4: #c084fc;
+    --sig-5: #fb7185;
+    --sig-6: #2dd4bf;
+    --sig-7: #facc15;
+    --sig-8: #818cf8;
   }
 }
 
@@ -183,3 +202,183 @@ input:focus, select:focus, textarea:focus {
 }
 
 .app-footer a { color: var(--accent); }
+
+/* ==== Экран «Кадр» ==== */
+
+.input-row {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.frame-input {
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  padding: 0.6rem 0.7rem;
+}
+
+.icon-btn {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-dim);
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.input-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.chip {
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 0.82rem;
+  cursor: pointer;
+  min-height: 36px;
+}
+
+.keypad { margin-top: 0.6rem; }
+
+.keys {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+}
+
+.keys-wide {
+  grid-template-columns: 2fr 1fr 2fr;
+  margin-top: 0.4rem;
+}
+
+/* Клавиша под палец: на 360 px это 80×52, промахнуться трудно даже в перчатке. */
+.key {
+  min-height: 52px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.keys-wide .key {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.key:active { background: var(--bg); }
+
+.history { margin-top: 0.7rem; display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.history-title { width: 100%; font-size: 0.75rem; color: var(--text-dim); }
+
+.card-title {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-bottom: 0.5rem;
+}
+
+.card-title small { font-family: var(--mono); margin-left: 0.4rem; }
+
+.id-line {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+}
+
+.kv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 0.7rem;
+  font-size: 0.88rem;
+}
+
+.kv .k { color: var(--text-dim); }
+.kv .v { text-align: right; }
+
+.msg-title { margin: 0 0 0.3rem; font-size: 0.95rem; }
+.acronym {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.85rem;
+  margin-right: 0.35rem;
+}
+
+.card-problem { border-color: var(--warn); }
+.problem-text { margin: 0; font-size: 0.9rem; color: var(--warn); }
+.card-unknown { border-style: dashed; }
+
+.sig-list { display: flex; flex-direction: column; }
+
+.sig-row {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 0.2rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  text-align: left;
+  font-size: 0.9rem;
+  cursor: pointer;
+  width: 100%;
+}
+
+.sig-row:last-child { border-bottom: none; }
+.sig-row.on { background: var(--bg); }
+
+.sig-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+.sig-name { line-height: 1.25; }
+.sig-name small { display: block; color: var(--text-dim); font-size: 0.72rem; font-family: var(--mono); }
+
+.sig-value { text-align: right; font-weight: 600; white-space: nowrap; }
+.sig-value small { display: block; font-weight: 400; color: var(--text-dim); font-size: 0.72rem; }
+.sig-value .dim { color: var(--text-dim); font-weight: 400; }
+.warn { color: var(--warn); }
+
+.bytes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+}
+
+.byte {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.4rem 0.2rem 0.3rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  min-height: 56px;
+}
+
+.byte.on { border-color: var(--accent); background: var(--surface); }
+.byte-free { opacity: 0.55; }
+.byte-no { font-size: 0.65rem; color: var(--text-dim); }
+.byte-hex { font-size: 1rem; font-weight: 700; letter-spacing: 0.05em; }
+.byte-dots { display: flex; gap: 2px; height: 4px; }
+.byte-dots i { width: 10px; height: 4px; border-radius: 2px; display: block; }

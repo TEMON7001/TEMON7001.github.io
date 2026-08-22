@@ -87,7 +87,9 @@
           "min": 0,
           "max": 255,
           "type": "number",
-          "doc_pos": "6.1"
+          "doc_pos": "6.1",
+          "special_values": "none",
+          "note": "Адрес занимает весь диапазон 0–255, FE и FF здесь обычные значения"
         },
         {
           "spn": 1675,
@@ -945,7 +947,7 @@
           "offset": 0,
           "unit": "км/л",
           "min": 0,
-          "max": 125.5,
+          "max": 125.498046875,
           "type": "number",
           "doc_pos": "3.1"
         },
@@ -959,7 +961,7 @@
           "offset": 0,
           "unit": "км/л",
           "min": 0,
-          "max": 125.5,
+          "max": 125.498046875,
           "type": "number",
           "doc_pos": "5.1"
         },
