@@ -114,10 +114,19 @@ export function go(id) {
 // падать из-за одной кривой строчки в справочнике нельзя.
 let catalog = null;
 let catalogError = null;
+let faultCodes = [];
 try {
   catalog = await loadCatalog(j1939.catalogUrl, { strict: isDevHost() });
 } catch (error) {
   catalogError = error;
+  console.error(error);
+}
+try {
+  // Коды отказов нужны справочнику и разбору неисправностей; без них
+  // остальное приложение работает, поэтому ошибку не поднимаем выше.
+  const response = await fetch(j1939.faultCodesUrl);
+  if (response.ok) faultCodes = (await response.json()).fmi || [];
+} catch (error) {
   console.error(error);
 }
 
@@ -130,6 +139,7 @@ const ctx = {
   getFavorites,
   catalog,
   catalogError,
+  faultCodes,
   protocol: j1939,
 };
 
