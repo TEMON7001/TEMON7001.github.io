@@ -486,3 +486,55 @@ label.chip { display: inline-flex; align-items: center; cursor: pointer; }
 /* В обратном расчёте байты только показываются, нажимать их незачем. */
 .bytes .byte:not(button) { cursor: default; }
 .sig-row:not(button) { cursor: default; }
+
+/* ==== Экран «Памятка» ==== */
+
+.cheat-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: var(--accent);
+}
+
+.cheat-text {
+  margin: 0 0 0.6rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.cheat-text:last-child { margin-bottom: 0; }
+
+/* Широкую таблицу прокручиваем внутри карточки, чтобы страница не ехала вбок. */
+.cheat-scroll {
+  overflow-x: auto;
+  margin: 0 0 0.6rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cheat-table {
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  min-width: 100%;
+}
+
+.cheat-table th,
+.cheat-table td {
+  text-align: left;
+  padding: 0.35rem 0.5rem 0.35rem 0;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+
+.cheat-table th {
+  color: var(--text-dim);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.cheat-table td:first-child {
+  font-family: var(--mono);
+  white-space: nowrap;
+  padding-right: 0.7rem;
+}
+
+.cheat-table tr:last-child td { border-bottom: none; }
