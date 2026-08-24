@@ -59,6 +59,13 @@ export function mount(root, ctx) {
 }
 
 export function onShow() {
+  // На экран приходят и с обратного расчёта: там кадр кладут в хранилище
+  // и переключают экран — значит поле надо перечитать.
+  const saved = context.store.get("lastFrame", "");
+  if (saved && saved !== input.value) {
+    input.value = saved;
+    render(false);
+  }
   renderHistory();
 }
 

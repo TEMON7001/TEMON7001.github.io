@@ -7,6 +7,7 @@ import { run as runCatalog } from "./catalog.test.js";
 import { run as runResolve } from "./resolve.test.js";
 import { run as runSearch } from "./search.test.js";
 import { run as runImport } from "./import.test.js";
+import { run as runCompose } from "./compose.test.js";
 import { report } from "./tiny.js";
 
 // Наборы, которым нужны файлы данных, получают их готовыми:
@@ -21,5 +22,6 @@ runCatalog(seed);
 runResolve(seed, vectors);
 runSearch(seed, faults.fmi);
 runImport(seed);
+runCompose(seed);
 
 report(document.getElementById("out"));

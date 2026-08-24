@@ -469,3 +469,20 @@ textarea {
 
 /* Метка выглядит как кнопка: настоящий выбор файла спрятан. */
 label.chip { display: inline-flex; align-items: center; cursor: pointer; }
+
+/* ==== Экран «Обратный расчёт» ==== */
+
+.rev-row { margin-bottom: 0.6rem; }
+.rev-row:last-of-type { margin-bottom: 0.3rem; }
+.rev-row .field-label small { color: var(--text-dim); font-size: 0.7rem; }
+
+.frame-out {
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  word-break: break-all;
+  margin-bottom: 0.6rem;
+}
+
+/* В обратном расчёте байты только показываются, нажимать их незачем. */
+.bytes .byte:not(button) { cursor: default; }
+.sig-row:not(button) { cursor: default; }
