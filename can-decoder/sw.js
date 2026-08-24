@@ -1,6 +1,6 @@
 // Приложение обязано полностью работать в поле без сети: механик стоит у машины,
 // интернета нет. Поэтому кэшируем всю оболочку сразу при установке, включая JSON-справочники.
-const CACHE_NAME = "can-decoder-v8";
+const CACHE_NAME = "can-decoder-v9";
 const ASSETS = [
   "./",
   "./index.html",
@@ -15,6 +15,10 @@ const ASSETS = [
   "./protocols/j1939/id.js",
   "./protocols/j1939/index.js",
   "./protocols/j1939/entries.js",
+  "./import/index.js",
+  "./import/candump.js",
+  "./import/generic.js",
+  "./ui/result-view.js",
   "./ui/_stub.js",
   "./ui/frame.js",
   "./ui/log.js",

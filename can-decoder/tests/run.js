@@ -6,6 +6,7 @@ import "./id.test.js";
 import { run as runCatalog } from "./catalog.test.js";
 import { run as runResolve } from "./resolve.test.js";
 import { run as runSearch } from "./search.test.js";
+import { run as runImport } from "./import.test.js";
 import { report } from "./tiny.js";
 
 // Наборы, которым нужны файлы данных, получают их готовыми:
@@ -19,5 +20,6 @@ const [seed, vectors, faults] = await Promise.all([
 runCatalog(seed);
 runResolve(seed, vectors);
 runSearch(seed, faults.fmi);
+runImport(seed);
 
 report(document.getElementById("out"));

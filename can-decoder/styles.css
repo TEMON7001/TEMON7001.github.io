@@ -455,3 +455,17 @@ input:focus, select:focus, textarea:focus {
 .ref-star.on { color: var(--accent); }
 
 input[type="search"] { font-size: 1rem; }
+
+/* ==== Экран «Лог» ==== */
+
+textarea {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-top: 0.5rem;
+  resize: vertical;
+}
+
+#log-parse { margin-top: 0.5rem; }
+
+/* Метка выглядит как кнопка: настоящий выбор файла спрятан. */
+label.chip { display: inline-flex; align-items: center; cursor: pointer; }

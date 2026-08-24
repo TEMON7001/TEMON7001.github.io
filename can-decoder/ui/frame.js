@@ -1,15 +1,12 @@
 // Экран «Кадр» — стартовый. Вставил кадр, увидел параметры, ничего не выбирая заранее.
 
-import { parseFrame, bytesToHex } from "../core/frame.js";
-import { resolve, KIND } from "../core/resolve.js";
-import { STATE } from "../core/signal.js";
+import { parseFrame } from "../core/frame.js";
+import { resolve } from "../core/resolve.js";
+import { renderResult, wireHighlight, escapeHtml as escape } from "./result-view.js";
 
 export const meta = { id: "frame", title: "Разбор кадра", short: "Кадр", icon: "🔎" };
 
 const EXAMPLE = "0CF00400 FF A5 A7 E0 2E FF FF FF";
-// Больше восьми цветов не нужно: в сообщении J1939 не бывает столько сигналов,
-// чтобы соседние по байтам совпали по цвету.
-const COLOR_COUNT = 8;
 
 let input;
 let keypad;
@@ -206,9 +203,8 @@ function render(fromUser) {
     return;
   }
 
-  output.innerHTML =
-    idCard(result) + messageCard(result) + signalsCard(result) + bytesCard(result) + skippedCard(result);
-  wireHighlight();
+  output.innerHTML = renderResult(result);
+  wireHighlight(output);
 
   if (frame.dlc > 0) {
     scheduleSave(text, describe(result));
@@ -234,191 +230,6 @@ function note(message) {
   output.insertAdjacentHTML("afterbegin", problem(message));
 }
 
-function idCard(result) {
-  const id = result.id;
-  const rows = [
-    ["PGN", id.pgn + " · " + id.pgnHex],
-    ["Приоритет", String(id.priority)],
-    ["Тип", id.pduFormat + (id.broadcast ? ", всем" : ", адресно")],
-    ["Отправитель (SA)", id.sa + " · 0x" + hex2(id.sa)],
-  ];
-  if (id.da !== null) rows.push(["Получатель (DA)", id.da + " · 0x" + hex2(id.da)]);
-  if (id.dp) rows.push(["Страница данных", String(id.dp)]);
-
-  return (
-    '<div class="card">' +
-      '<div class="id-line mono">' + escape(id.idHex) + "</div>" +
-      '<div class="kv">' +
-        rows.map(([k, v]) => '<div class="k">' + k + '</div><div class="v mono">' + escape(v) + "</div>").join("") +
-      "</div>" +
-    "</div>"
-  );
-}
-
-function messageCard(result) {
-  if (result.kind === KIND.UNKNOWN) {
-    return (
-      '<div class="card card-unknown">' +
-        "<p><strong>PGN не распознан</strong></p>" +
-        '<p class="hint">Номер отсутствует в справочнике. Значения параметров не выводятся, ' +
-        "ниже показаны байты кадра в исходном виде.</p>" +
-      "</div>"
-    );
-  }
-
-  const message = result.message;
-  const parts = [];
-  if (message.acronym) parts.push('<span class="acronym mono">' + escape(message.acronym) + "</span>");
-  parts.push("<strong>" + escape(message.name) + "</strong>");
-
-  let extra = "";
-  if (result.kind === KIND.SERVICE) {
-    extra =
-      '<p class="hint">Служебное сообщение. Содержимое кадра не разбирается.' +
-      (message.note ? " " + escape(message.note) : "") +
-      "</p>";
-  } else {
-    const bits = [];
-    if (message.rate_ms) bits.push("период " + message.rate_ms + " мс");
-    else bits.push("передаётся по запросу");
-    bits.push(message.length + " байт");
-    if (result.lengthMismatch) {
-      bits.push(
-        "<span class=\"warn\">в кадре " + result.lengthMismatch.got + "</span>"
-      );
-    }
-    extra = '<p class="hint">' + bits.join(" · ") + "</p>";
-  }
-
-  return '<div class="card"><p class="msg-title">' + parts.join(" ") + "</p>" + extra + "</div>";
-}
-
-function signalsCard(result) {
-  if (!result.signals.length) return "";
-
-  const rows = result.signals
-    .map((signal, index) => {
-      const color = "var(--sig-" + ((index % COLOR_COUNT) + 1) + ")";
-      return (
-        '<button type="button" class="sig-row" data-spn="' + signal.spn + '">' +
-          '<span class="sig-dot" style="background:' + color + '"></span>' +
-          '<span class="sig-name">' + escape(signal.name) +
-            '<small>SPN ' + signal.spn + "</small></span>" +
-          '<span class="sig-value">' + valueHtml(signal) + "</span>" +
-        "</button>"
-      );
-    })
-    .join("");
-
-  return '<div class="card"><div class="sig-list">' + rows + "</div></div>";
-}
-
-function valueHtml(signal) {
-  if (signal.state === STATE.NOT_AVAILABLE) {
-    return '<span class="dim">данные недоступны</span>';
-  }
-  if (signal.state === STATE.ERROR) {
-    return '<span class="warn">ошибка датчика</span>';
-  }
-
-  if (signal.label !== null) {
-    return escape(signal.label) + '<small class="mono">код ' + signal.raw + "</small>";
-  }
-
-  const shown = format(signal.value);
-  const unit = signal.unit ? '<small>' + escape(signal.unit) + "</small>" : "";
-  const out = '<span class="' + (signal.valid ? "" : "warn") + '">' + shown + "</span>" + unit;
-  return signal.valid ? out : out + '<small class="warn">вне диапазона</small>';
-}
-
-function bytesCard(result) {
-  const bytes = result.frame.bytes;
-  if (!bytes.length) {
-    return '<div class="card"><p class="hint">Кадр содержит только идентификатор, байты данных отсутствуют.</p></div>';
-  }
-
-  const order = new Map();
-  result.signals.forEach((signal, index) => order.set(signal.spn, index));
-
-  const cells = Array.from(bytes, (value, index) => {
-    const owners = result.byteOwners[index] || [];
-    const dots = owners
-      .map((spn) => {
-        const color = "var(--sig-" + ((order.get(spn) % COLOR_COUNT) + 1) + ")";
-        return '<i style="background:' + color + '"></i>';
-      })
-      .join("");
-    return (
-      '<button type="button" class="byte' + (owners.length ? "" : " byte-free") + '" ' +
-        'data-owners="' + owners.join(",") + '">' +
-        '<span class="byte-no">' + (index + 1) + "</span>" +
-        '<span class="byte-hex mono">' + hex2(value) + "</span>" +
-        '<span class="byte-dots">' + dots + "</span>" +
-      "</button>"
-    );
-  }).join("");
-
-  return (
-    '<div class="card">' +
-      '<div class="card-title">Байты <small>' + escape(bytesToHex(bytes)) + "</small></div>" +
-      '<div class="bytes">' + cells + "</div>" +
-      '<p class="hint">Нумерация байтов по документации J1939, с единицы. ' +
-      "Нажатие на байт выделяет связанные параметры.</p>" +
-    "</div>"
-  );
-}
-
-function skippedCard(result) {
-  if (!result.skipped.length) return "";
-  const items = result.skipped
-    .map((item) => "<li>" + escape(item.name) + " <small>SPN " + item.spn + "</small></li>")
-    .join("");
-  return (
-    '<div class="card card-unknown">' +
-      "<p><strong>Параметры вне длины кадра</strong></p>" +
-      '<ul class="stub-list">' + items + "</ul>" +
-      '<p class="hint">Кадр короче сообщения из справочника, данных для этих параметров нет.</p>' +
-    "</div>"
-  );
-}
-
-// Подсветка в обе стороны: нажали сигнал — видно его байты, нажали байт — видно его сигналы.
-function wireHighlight() {
-  const rows = output.querySelectorAll(".sig-row");
-  const cells = output.querySelectorAll(".byte");
-
-  const clear = () => {
-    rows.forEach((row) => row.classList.remove("on"));
-    cells.forEach((cell) => cell.classList.remove("on"));
-  };
-
-  rows.forEach((row) => {
-    row.addEventListener("click", () => {
-      const spn = row.dataset.spn;
-      const active = row.classList.contains("on");
-      clear();
-      if (active) return;
-      row.classList.add("on");
-      cells.forEach((cell) => {
-        if (cell.dataset.owners.split(",").includes(spn)) cell.classList.add("on");
-      });
-    });
-  });
-
-  cells.forEach((cell) => {
-    cell.addEventListener("click", () => {
-      const owners = cell.dataset.owners.split(",").filter(Boolean);
-      const active = cell.classList.contains("on");
-      clear();
-      if (active || !owners.length) return;
-      cell.classList.add("on");
-      rows.forEach((row) => {
-        if (owners.includes(row.dataset.spn)) row.classList.add("on");
-      });
-    });
-  });
-}
-
 // ==== Мелочи ====
 
 // Подпись записи в истории. Один акроним не различает посылки: EEC1 приходит десятками
@@ -438,17 +249,4 @@ function shorten(text) {
   }
   if (parts.length <= 4) return parts.join(" ");
   return parts.slice(0, 4).join(" ") + "…";
-}
-
-function format(value) {
-  if (value === null) return "—";
-  return value.toLocaleString("ru-RU", { maximumFractionDigits: 3 });
-}
-
-function hex2(value) {
-  return value.toString(16).toUpperCase().padStart(2, "0");
-}
-
-function escape(text) {
-  return String(text).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 }
