@@ -3,6 +3,7 @@
 import { parseLog, summarize } from "../import/index.js";
 import { resolve, KIND } from "../core/resolve.js";
 import { renderResult, wireHighlight, escapeHtml } from "./result-view.js";
+import { faultNoticeCard, faultNoticeLine, sendLogButton } from "./contact.js";
 
 export const meta = { id: "log", title: "Разбор лога", short: "Лог", icon: "📄" };
 
@@ -186,6 +187,17 @@ function renderGroups() {
     if (!shown.length) html += card("Под фильтр ничего не подошло.");
   }
 
+  // Логи с реальной техники — то, чего проекту не хватает больше всего,
+  // поэтому просьба висит под каждым разобранным логом.
+  if (groups.length) {
+    html +=
+      '<div class="card">' +
+        '<p class="hint">Есть лог с настоящей машины? Пришлите — по нему научим приложение ' +
+        "разбирать коды неисправностей.</p>" +
+        '<div class="input-tools">' + sendLogButton("Прислать лог") + "</div>" +
+      "</div>";
+  }
+
   nodes.groups.innerHTML = html;
 
   nodes.groups.querySelectorAll("button[data-key]").forEach((button) => {
@@ -218,7 +230,8 @@ function groupCard(title, list, unknown) {
               " · SA " + group.sa + " · " + group.count + " кадр" + ending(group.count) +
               " · " + period + "</span>" +
           "</button>" +
-        "</div>"
+        "</div>" +
+        faultNoticeLine(group.pgn, context.protocol)
       );
     })
     .join("");
@@ -242,7 +255,8 @@ function showFrame(key) {
       '<button type="button" class="chip" data-close="1">← К списку</button>' +
       '<p class="hint">Последний кадр из ' + group.count + ", строка " + group.last.number + when + "</p>" +
     "</div>" +
-    renderResult(result);
+    renderResult(result) +
+    faultNoticeCard(result.id.pgn, context.protocol);
 
   wireHighlight(nodes.details);
   nodes.details.querySelector("[data-close]").addEventListener("click", () => {

@@ -9,6 +9,8 @@ export const j1939 = {
   catalogUrl: "data/j1939-pgn.json",
   faultCodesUrl: "data/fmi.json",
   globalAddress: GLOBAL_ADDRESS,
+  // Сообщения с кодами неисправностей: DM1 — активные, DM2 — сохранённые.
+  faultCodePgns: [65226, 65227],
   parseId,
   buildId,
   parseRequestedPgn,

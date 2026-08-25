@@ -3,6 +3,7 @@
 import { parseFrame } from "../core/frame.js";
 import { resolve } from "../core/resolve.js";
 import { renderResult, wireHighlight, escapeHtml as escape } from "./result-view.js";
+import { faultNoticeCard } from "./contact.js";
 
 export const meta = { id: "frame", title: "Разбор кадра", short: "Кадр", icon: "🔎" };
 
@@ -210,7 +211,7 @@ function render(fromUser) {
     return;
   }
 
-  output.innerHTML = renderResult(result);
+  output.innerHTML = renderResult(result) + faultNoticeCard(result.id.pgn, context.protocol);
   wireHighlight(output);
 
   if (frame.dlc > 0) {
