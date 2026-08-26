@@ -176,6 +176,27 @@ input[type="number"]:focus, select:focus {
   margin-bottom: 0.5rem;
 }
 
+/* Подзаголовок под цифрой: явно говорит, что это норматив, а не рекомендация */
+.result-sub {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  margin: -0.35rem 0 0.5rem;
+}
+
+/* Практический запас — визуально отделён от расчёта по ПУЭ */
+.result-advice {
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text);
+  background: var(--bg);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 0.45rem 0.6rem;
+  margin: 0 0 0.6rem;
+}
+
+.result-advice b { color: var(--accent); }
+
 .result-note {
   font-size: 0.82rem;
   color: var(--text-dim);

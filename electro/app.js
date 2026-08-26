@@ -45,6 +45,13 @@ function sectionByVoltageDrop({ current, length, material, phase, cosphi, allowe
   return { raw, rounded };
 }
 
+// Сколько вольт реально теряется на линии при выбранном сечении
+function voltageDropAt(section, { current, length, material, phase, cosphi }) {
+  const rho = RESISTIVITY[material];
+  const k = phase === 1 ? 2 : Math.sqrt(3);
+  return (k * current * rho * length * cosphi) / section;
+}
+
 // ==== Вкладка "Сечение кабеля" ====
 const loadModeButtons = document.querySelectorAll('[data-role="load-mode"] .seg-btn');
 let loadMode = "current";
@@ -112,7 +119,16 @@ function computeCable() {
   }
 
   const finalSection = Math.max(byHeat.section, byDrop.rounded);
-  const governedBy = byHeat.section >= byDrop.rounded ? "нагрев (допустимый ток)" : "потеря напряжения";
+  const governedBy = byHeat.section >= byDrop.rounded ? "нагрев (допустимый ток)" : "просадка напряжения";
+
+  // Практический запас: следующая ступень стандартного ряда. Не норматив ПУЭ —
+  // поправка на кабель по ТУ с заниженным сечением и на будущую нагрузку.
+  const series = SECTION_SERIES[material];
+  const idx = series.indexOf(finalSection);
+  const withMargin = idx >= 0 && idx + 1 < series.length ? series[idx + 1] : null;
+
+  const dropVolts = voltageDropAt(finalSection, { current, length, material, phase, cosphi });
+  const voltageAtLoad = voltage - dropVolts;
   // Сечение по потере напряжения может выйти за верхнюю границу таблицы
   // (для прокладки в трубе данные ПУЭ заканчиваются на 120 мм²).
   const finalAmpacityRaw = table[finalSection];
@@ -121,12 +137,19 @@ function computeCable() {
       ? "нет в таблице для этой прокладки"
       : `${finalAmpacityRaw} А`;
 
+  const marginBlock = withMargin
+    ? `<p class="result-advice">На практике берут ступень выше — <b>${fmt(withMargin, 2)} мм²</b></p>`
+    : `<p class="result-advice">Запас взять не из чего — это верхняя ступень ряда.</p>`;
+
   out.innerHTML = `
     <div class="result-headline">${fmt(finalSection, 2)} мм²</div>
+    <div class="result-sub">по ПУЭ-7, минимально допустимое</div>
+    ${marginBlock}
     <div class="result-row"><span class="k">Расчётный ток</span><span class="v">${fmt(current)} А</span></div>
     <div class="result-row"><span class="k">По нагреву (табл. ПУЭ)</span><span class="v">${fmt(byHeat.section, 2)} мм² (${byHeat.ampacity} А)</span></div>
-    <div class="result-row"><span class="k">По потере напряжения</span><span class="v">${fmt(byDrop.rounded, 2)} мм²</span></div>
+    <div class="result-row"><span class="k">По просадке напряжения</span><span class="v">${fmt(byDrop.rounded, 2)} мм²</span></div>
     <div class="result-row"><span class="k">Допустимый ток итог. сечения</span><span class="v">${finalAmpacity}</span></div>
+    <div class="result-row"><span class="k">Напряжение в конце линии</span><span class="v">${fmt(voltageAtLoad)} В (−${fmt(dropVolts)} В)</span></div>
     <p class="result-note">Определяющий критерий: ${governedBy}. Сеть: ${phase === 1 ? "220 В, 1 фаза" : "380 В, 3 фазы"}, cos φ ${fmt(cosphi, 2)}. Материал: ${MATERIAL_LABELS[material]}, прокладка: ${INSTALL_LABELS[install]}.</p>
   `;
 }
