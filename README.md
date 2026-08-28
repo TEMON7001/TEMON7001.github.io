@@ -13,6 +13,7 @@
 /.nojekyll              отключает Jekyll — без него Pages не публикует .well-known
 /.well-known/assetlinks.json   связка сайта и Android-приложений (по одному блоку на приложение)
 /electro/               «Расчёт сечения по ПУЭ» — PWA
+/can-decoder/           «CAN Дешифратор» — PWA
 ```
 
 Файл `.nojekyll` удалять нельзя. GitHub Pages по умолчанию прогоняет репозиторий через Jekyll,

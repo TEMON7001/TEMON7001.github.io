@@ -1,6 +1,6 @@
 {
-  "name": "CAN-дешифратор J1939",
-  "short_name": "CAN J1939",
+  "name": "CAN Дешифратор",
+  "short_name": "CAN Дешифратор",
   "description": "Разбор кадров и логов шины CAN по SAE J1939: значения параметров, обратный расчёт, справочник PGN и SPN, коды FMI. Работает офлайн.",
   "id": "/can-decoder/",
   "start_url": "/can-decoder/index.html",

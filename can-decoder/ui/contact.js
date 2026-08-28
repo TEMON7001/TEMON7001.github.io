@@ -4,7 +4,7 @@
 import { escapeHtml } from "./result-view.js";
 
 /** Адрес меняется здесь и больше нигде. */
-export const FEEDBACK_EMAIL = "Temon7001@gmail.com";
+export const FEEDBACK_EMAIL = "temongelios@gmail.com";
 
 const LOG_SUBJECT = "CAN Дешифратор — лог с техники";
 const LOG_BODY =

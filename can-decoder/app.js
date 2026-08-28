@@ -160,7 +160,7 @@ function render(id) {
   screen.onShow?.(root, ctx);
 
   titleEl.textContent = screen.meta.title;
-  document.title = screen.meta.title + " — CAN-дешифратор";
+  document.title = screen.meta.title + " — CAN Дешифратор";
 
   for (const btn of tabbar.children) {
     btn.classList.toggle("active", btn.dataset.screen === id);

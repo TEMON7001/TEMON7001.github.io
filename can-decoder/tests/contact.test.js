@@ -5,7 +5,7 @@ import { suite, test, eq } from "./tiny.js";
 export function run() {
   suite("ui/contact.js — просьба прислать лог");
 
-  test("адрес задан в одном месте", () => eq(FEEDBACK_EMAIL, "Temon7001@gmail.com", "адрес"));
+  test("адрес задан в одном месте", () => eq(FEEDBACK_EMAIL, "temongelios@gmail.com", "адрес"));
 
   test("ссылка ведёт в почтовый клиент с заполненной темой", () => {
     const href = logMailtoHref();

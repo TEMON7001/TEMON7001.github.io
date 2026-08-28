@@ -8,5 +8,15 @@
         "68:6C:9A:93:87:E9:BF:D2:82:83:AA:1E:0B:5B:C8:59:3B:03:28:F5:39:CB:0C:95:70:7B:C9:46:D1:04:5D:3A"
       ]
     }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "ru.temon.candecoder",
+      "sha256_cert_fingerprints": [
+        "68:6C:9A:93:87:E9:BF:D2:82:83:AA:1E:0B:5B:C8:59:3B:03:28:F5:39:CB:0C:95:70:7B:C9:46:D1:04:5D:3A"
+      ]
+    }
   }
 ]
