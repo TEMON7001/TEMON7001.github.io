@@ -15,7 +15,24 @@ const FORMS = {
   "шт":           ["шт", "шт", "шт"],
   "м²":           ["м²", "м²", "м²"],
   "пог. м":       ["пог. м", "пог. м", "пог. м"],
+  "позиция":      ["позиция", "позиции", "позиций"],
 };
+
+// Винительный падеж: «цена за пачку», а не «цена за пачка».
+// Отдельная таблица, потому что из именительного он не выводится правилом.
+const ACCUSATIVE = {
+  "упаковка": "упаковку",
+  "банка": "банку",
+  "пачка": "пачку",
+  "канистра": "канистру",
+  "планка": "планку",
+  "плитка": "плитку",
+};
+
+/** Единица после предлога «за»: unitAccusative("пачка") → "пачку". */
+export function unitAccusative(unit) {
+  return ACCUSATIVE[unit] || unit;
+}
 
 /** Форма единицы для количества: plural(5, "рулон") → "рулонов". */
 export function plural(count, unit) {
@@ -41,4 +58,24 @@ export function formatNumber(value, digits = 2) {
 /** «5 рулонов», «1 пачка», «12,6 м²». */
 export function formatQty(count, unit) {
   return formatNumber(count) + " " + plural(count, unit);
+}
+
+/** Деньги: 18 400 ₽. Разряды разделены неразрывным пробелом, копейки не показываем —
+    в списке закупки они шум, а не точность. */
+export function formatMoney(value) {
+  if (!Number.isFinite(value)) return "—";
+  const rounded = Math.round(value);
+  return String(Math.abs(rounded))
+    .replace(/\B(?=(\d{3})+(?!\d))/g, " ")
+    .replace(/^/, rounded < 0 ? "−" : "") + " ₽";
+}
+
+/** Цена из поля ввода: «4 500,50» → 4500.5. Пустое поле — это null, а не ноль:
+    ноль означал бы «бесплатно», а пустое — «цену ещё не знаю». */
+export function parseMoney(text) {
+  if (text === undefined || text === null) return null;
+  const clean = String(text).replace(/[\s ]/g, "").replace(",", ".");
+  if (clean === "") return null;
+  const number = Number(clean);
+  return Number.isFinite(number) && number >= 0 ? number : null;
 }

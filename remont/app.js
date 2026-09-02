@@ -80,6 +80,26 @@ export function updateParams(group, patch) {
   recompute();
 }
 
+/**
+ * Цена позиции. Пустое поле — это «цену ещё не знаю», поэтому значение стирается,
+ * а не сохраняется нулём.
+ *
+ * Пересчёта экранов здесь нет намеренно: цена меняет только суммы на самом экране
+ * «Список», а перерисовка во время набора уводила бы курсор из поля.
+ */
+export function updatePrice(id, value) {
+  if (value === "") delete state.prices[id];
+  else state.prices[id] = value;
+  store.set("prices", state.prices);
+}
+
+/** Отметка «куплено». Тоже без пересчёта: список от неё не меняется. */
+export function toggleBought(id, on) {
+  if (on) state.bought[id] = true;
+  else delete state.bought[id];
+  store.set("bought", state.bought);
+}
+
 function recompute() {
   geometry = computeRoom(state.room);
   ctx.geometry = geometry;
@@ -144,6 +164,8 @@ const ctx = {
   updateRoom,
   updateWorks,
   updateParams,
+  updatePrice,
+  toggleBought,
 };
 
 // ==== Отрисовка ====
