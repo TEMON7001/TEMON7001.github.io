@@ -205,7 +205,11 @@ if ("serviceWorker" in navigator) {
     location.reload();
   });
 
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("sw.js").catch(() => {});
-  });
+  const register = () => navigator.serviceWorker.register("sw.js").catch(() => {});
+
+  // Подписаться на «load» тут уже поздно: наверху модуля стоит await за справочником,
+  // и к этой строке загрузка страницы обычно успевает закончиться. Подписка на
+  // прошедшее событие не срабатывает никогда — офлайна не было бы, и молча.
+  if (document.readyState === "complete") register();
+  else window.addEventListener("load", register);
 }
