@@ -1,0 +1,242 @@
+/* Оформление взято от electro и can-decoder: те же карточки, тот же таббар,
+   те же переменные тем. Приложения одной полки должны выглядеть одинаково. */
+
+:root {
+  --bg: #f4f5f7;
+  --surface: #ffffff;
+  --text: #171a21;
+  --text-dim: #5b6270;
+  --accent: #1f8a4c;
+  --accent-2: #1d4ed8;
+  --danger: #c0392b;
+  --border: #e1e3e8;
+  --tabbar-bg: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1720;
+    --surface: #16202b;
+    --text: #eef1f5;
+    --text-dim: #93a0b0;
+    --accent: #3ddc84;
+    --accent-2: #5b9bff;
+    --danger: #ff6b5e;
+    --border: #263140;
+    --tabbar-bg: #121a24;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ==== Шапка ==== */
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.logo { font-size: 1.4rem; }
+
+.topbar h1 {
+  font-size: 1.05rem;
+  margin: 0;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ==== Экраны ==== */
+
+.content {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0.7rem 0.85rem 0.5rem;
+}
+
+.screen.hidden { display: none; }
+.hidden { display: none !important; }
+
+.screen-h2 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+  color: var(--text);
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.75rem 0.8rem;
+  margin-bottom: 0.7rem;
+}
+
+.card-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0 0 0.5rem;
+}
+
+/* ==== Поля ==== */
+
+.field-label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin: 0.5rem 0 0.2rem;
+}
+
+.field-label:first-child { margin-top: 0; }
+
+/* Кегль 16 px обязателен: на меньшем iOS зумит страницу при фокусе,
+   и человек проваливается в увеличенное поле посреди ввода размеров. */
+input, select {
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  appearance: none;
+}
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--accent-2);
+}
+
+/* Парные и тройные поля в строке — так карточка результата попадает
+   в первый экран без прокрутки. */
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 0.6rem;
+}
+
+.row3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0 0.5rem;
+}
+
+.row2 > div > .field-label:first-child,
+.row3 > div > .field-label:first-child { margin-top: 0.5rem; }
+
+.hint {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  margin: 0.4rem 0 0;
+  line-height: 1.4;
+}
+
+/* ==== Результат ==== */
+
+.result { border-color: var(--accent); }
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.28rem 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.result-row:last-child { border-bottom: none; }
+.result-row .k { color: var(--text-dim); font-size: 0.88rem; }
+.result-row .v { font-size: 1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+.result-note {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  line-height: 1.45;
+  margin: 0.5rem 0 0;
+}
+
+.result-warning {
+  color: var(--danger);
+  font-weight: 600;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin: 0.4rem 0 0;
+}
+
+.placeholder {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.disclaimer {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+  padding: 0 0.2rem;
+}
+
+/* ==== Таббар ==== */
+
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--tabbar-bg);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 10;
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.55rem 0.2rem 0.5rem;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.tab-icon { font-size: 1.25rem; }
+.tab-btn.active { color: var(--accent); }
+
+.app-footer {
+  /* Запас под фиксированный таббар нужен именно здесь: подвал идёт после .content,
+     поэтому отступ у .content оказывался бы над подвалом и не спасал. */
+  padding: 18px 16px calc(5rem + env(safe-area-inset-bottom));
+  text-align: center;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.app-footer a { color: var(--accent-2); }

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-label="Ремонт комнаты">
+  <rect width="192" height="192" rx="42" fill="#1f8a4c"/>
+  <rect x="44" y="40" width="76" height="30" rx="6" fill="#ffffff"/>
+  <rect x="120" y="49" width="16" height="12" fill="#ffffff"/>
+  <path d="M136 55h14a6 6 0 0 1 6 6v20a6 6 0 0 1-6 6h-32v10" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="104" y="97" width="28" height="56" rx="7" fill="#ffffff"/>
+  <rect x="36" y="96" width="52" height="10" rx="5" fill="#ffffff" opacity=".85"/>
+  <rect x="36" y="120" width="52" height="10" rx="5" fill="#ffffff" opacity=".65"/>
+  <rect x="36" y="144" width="52" height="10" rx="5" fill="#ffffff" opacity=".45"/>
+</svg>

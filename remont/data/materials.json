@@ -1,0 +1,83 @@
+{
+  "format_version": 1,
+  "note": "Справочные нормы расхода и ряды фасовок. Значения требуют сверки с практикой и с упаковкой в магазине — сверяет Артём (журнал проекта, п. 6). Код эти числа не зашивает: правится только этот файл.",
+
+  "wallpaper": {
+    "trim_m": 0.10,
+    "rollWidths_m": [0.53, 1.06],
+    "rollLengths_m": [10.05, 25],
+    "rapports_m": [0, 0.32, 0.64],
+    "defaults": { "rollWidth_m": 1.06, "rollLength_m": 10.05, "rapport_m": 0, "kind": "fleece" },
+    "glue": {
+      "note": "Норма дана на квадратный метр обоев, а не на рулон: рулон 1,06 вдвое больше рулона 0,53, и одна норма на оба врёт. Площадь считается по купленным рулонам.",
+      "packSize_g": 250,
+      "perArea_g_per_m2": { "paper": 12, "fleece": 10, "vinyl": 17 },
+      "kinds": [
+        { "id": "paper",  "name": "Бумажные" },
+        { "id": "fleece", "name": "Флизелиновые" },
+        { "id": "vinyl",  "name": "Виниловые" }
+      ]
+    }
+  },
+
+  "paint": {
+    "perCoat_l_per_m2": 0.12,
+    "coats": 2,
+    "packs_l": [0.9, 2.7, 9]
+  },
+
+  "primer": {
+    "consumption_l_per_m2": 0.1,
+    "packs_l": [1, 2, 5, 10]
+  },
+
+  "laminate": {
+    "packArea_m2": 2.13,
+    "reserve": { "straight": 0.05, "diagonal": 0.12 },
+    "layings": [
+      { "id": "straight",  "name": "Прямая укладка" },
+      { "id": "diagonal",  "name": "Диагональная укладка" }
+    ],
+    "underlay": { "rollArea_m2": 15 }
+  },
+
+  "tile": {
+    "reserve": 0.10,
+    "defaults": { "sideA_mm": 300, "sideB_mm": 300, "joint_mm": 2, "thickness_mm": 8 },
+    "adhesive": {
+      "note": "Расход зависит от большей стороны плитки: чем крупнее плитка, тем толще слой клея.",
+      "bag_kg": 25,
+      "rates_kg_per_m2": [
+        { "upToSide_mm": 200,  "kg": 3.5 },
+        { "upToSide_mm": 300,  "kg": 4.5 },
+        { "upToSide_mm": 600,  "kg": 6.0 },
+        { "upToSide_mm": null, "kg": 7.5 }
+      ]
+    },
+    "grout": {
+      "note": "Глубина шва принимается равной толщине плитки, плотность смеси 1,6 г/см³.",
+      "density_g_per_cm3": 1.6,
+      "packs_kg": [2, 5, 20]
+    }
+  },
+
+  "linoleum": {
+    "rollWidths_m": [1.5, 2.0, 2.5, 3.0, 3.5, 4.0],
+    "lengthExtra_m": 0.1
+  },
+
+  "plaster": {
+    "layer_mm": 10,
+    "consumption_kg_per_m2_per_mm": 0.9,
+    "bag_kg": 30
+  },
+
+  "putty": {
+    "consumption_kg_per_m2": 1.2,
+    "bag_kg": 20
+  },
+
+  "skirting": {
+    "plankLength_m": 2.5
+  }
+}
