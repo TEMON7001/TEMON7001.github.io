@@ -131,7 +131,7 @@ export function paint(area, params, data, place = "walls") {
   }));
 }
 
-export function primer(area, data, place = "walls") {
+export function primerFor(area, data, place = "walls") {
   const cfg = data.primer;
   if (!(area > 0)) throw new CalcError("Не задана площадь под грунтовку.");
 
@@ -146,6 +146,29 @@ export function primer(area, data, place = "walls") {
     note: index > 0 ? "" :
       n(area, 1) + " м² × " + n(cfg.consumption_l_per_m2) + " л/м² = " + n(liters) + " л",
   }));
+}
+
+// ==== Вызовы из каталога работ ====
+// Каталог (core/works.js) зовёт расчёты одинаково: (geom, params, data, works).
+// Какую именно площадь берёт материал — знание этих трёх обёрток, а не сборщика списка.
+
+export function paintWalls(geom, params, data) {
+  return paint(geom.wallsNet, params, data, "walls");
+}
+
+export function paintCeiling(geom, params, data) {
+  return paint(geom.ceilingArea, params, data, "ceiling");
+}
+
+/** Грунтуем стены, а если потолок красится — то и его: под краску грунт обязателен. */
+export function primer(geom, params, data, works) {
+  const withCeiling = works && works.ceiling === "paint";
+  const area = geom.wallsNet + (withCeiling ? geom.ceilingArea : 0);
+  const items = primerFor(area, data);
+  if (withCeiling && items.length) {
+    items[0].note += " — стены и потолок";
+  }
+  return items;
 }
 
 // ==== Стены: штукатурка и шпатлёвка ====

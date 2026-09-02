@@ -5,6 +5,7 @@
 // Никакой экран не хранит свою копию размеров и не пересчитывает геометрию сам.
 
 import { computeRoom, DEFAULT_ROOM } from "./core/room.js";
+import { DEFAULT_WORKS } from "./core/works.js";
 
 import * as room from "./ui/room.js";
 import * as works from "./ui/works.js";
@@ -45,8 +46,8 @@ export const store = {
 
 const state = {
   room: { ...DEFAULT_ROOM, ...(store.get("room") || {}) },
-  works: store.get("works", {}),   // что делаем со стенами, полом, потолком — T3
-  params: store.get("params", {}), // параметры материалов — T3
+  works: { ...DEFAULT_WORKS, ...(store.get("works") || {}) }, // что делаем со стенами, полом, потолком
+  params: store.get("params", {}),                            // параметры материалов, только изменённые вручную
   prices: store.get("prices", {}), // цены по id позиции — T5
   bought: store.get("bought", {}), // отметки «куплено» — T5
 };
@@ -63,10 +64,19 @@ export function updateRoom(patch) {
   store.set("room", state.room);
 }
 
-/** Изменение выбранных работ и параметров материалов. */
+/** Изменение выбранных работ: обои или краска, ламинат или плитка. */
 export function updateWorks(patch) {
   Object.assign(state.works, patch);
   store.set("works", state.works);
+  recompute();
+}
+
+/** Изменение параметра материала. Храним только то, что человек тронул руками:
+    остальное берётся из справочника и меняется вместе с ним. */
+export function updateParams(group, patch) {
+  const current = state.params[group] || (state.params[group] = {});
+  Object.assign(current, patch);
+  store.set("params", state.params);
   recompute();
 }
 
@@ -133,6 +143,7 @@ const ctx = {
   go,
   updateRoom,
   updateWorks,
+  updateParams,
 };
 
 // ==== Отрисовка ====

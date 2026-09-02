@@ -62,7 +62,7 @@ export function report(root) {
     '<p class="summary ' + (failed.length ? "bad" : "good") + '">' +
     (failed.length
       ? "Провалено " + failed.length + " из " + results.length
-      : "Все " + results.length + " тестов прошли") +
+      : "Все тесты прошли: " + results.length) +
     "</p>";
 
   const body = Array.from(bySuite, ([name, list]) => {

@@ -129,6 +129,17 @@ input:focus, select:focus {
   border-color: var(--accent-2);
 }
 
+/* Флажок — не текстовое поле: правило выше растянуло бы его на всю строку
+   и стёрло галочку вместе с системной отрисовкой. */
+input[type="checkbox"] {
+  appearance: auto;
+  -webkit-appearance: checkbox;
+  width: auto;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
 /* Парные и тройные поля в строке — так карточка результата попадает
    в первый экран без прокрутки. */
 .row2 {
@@ -151,6 +162,91 @@ input:focus, select:focus {
   color: var(--text-dim);
   margin: 0.4rem 0 0;
   line-height: 1.4;
+}
+
+/* ==== Выбор варианта ====
+   Кнопки-таблетки, а не сегментированный переключатель: «Штукатурка» и «Линолеум»
+   в одну строку на телефоне не влезают, а перенос по строкам выглядит естественно. */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  /* Цвет подложки, а не фиксированный: в светлой теме акцент тёмный, в тёмной светлый. */
+  color: var(--surface);
+  font-weight: 600;
+}
+
+/* «Ничего» — тоже выбор, но не повод красить экран акцентом: на старте не выбрано
+   ничего, и три ярких кнопки выглядели бы как принятые решения. */
+.chip-none.active {
+  background: var(--border);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.params-toggle {
+  display: block;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--accent-2);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.params {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border);
+}
+
+/* Параметры мелочёвки сдвинуты под свой пункт: без отступа непонятно, к «Плинтусу»
+   они относятся или к следующей строке. Отступ равен флажку плюс промежуток. */
+.check + .params-toggle,
+.check + .params-toggle + .params {
+  margin-left: 1.95rem;
+}
+
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.45rem 0;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.check input[type="checkbox"] {
+  width: 1.35rem;
+  height: 1.35rem;
+  margin: 0;
+  flex: none;
+  accent-color: var(--accent);
+}
+
+.check-hint {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+  margin-top: 0.1rem;
 }
 
 /* ==== Результат ==== */

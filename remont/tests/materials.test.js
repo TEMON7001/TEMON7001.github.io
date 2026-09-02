@@ -176,8 +176,16 @@ export function run(data) {
   });
 
   test("грунтовка стен: 3,38 л", () => {
-    const items = m.primer(g.wallsNet, data);
+    const items = m.primerFor(g.wallsNet, data);
     eq(items[0].note.includes("3,38 л"), true, "объём в примечании");
+  });
+
+  test("если потолок красится — грунтуем и его", () => {
+    const walls = m.primer(g, {}, data, { ceiling: "none" })[0];
+    const both = m.primer(g, {}, data, { ceiling: "paint" })[0];
+    eq(walls.note.includes("33,8 м²"), true, "площадь только стен");
+    eq(both.note.includes("45,8 м²"), true, "площадь стен и потолка");
+    eq(both.note.includes("стены и потолок"), true, "пояснение в примечании");
   });
 
   suite("Единицы покупки");
@@ -205,7 +213,7 @@ export function run(data) {
       ...m.stretchCeiling(g),
       ...m.skirting(g, {}, data),
       ...m.thresholds(g),
-      ...m.primer(g.wallsNet, data),
+      ...m.primerFor(g.wallsNet, data),
       ...m.paint(g.wallsNet, {}, data, "walls"),
     ];
     const broken = items.filter((i) => !Number.isFinite(i.qty) || i.qty <= 0 || !i.id || !i.name || !i.unit);
