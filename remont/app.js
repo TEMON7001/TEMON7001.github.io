@@ -232,3 +232,32 @@ const saved = store.get("lastScreen");
 const startId = idFromHash() || (screenById(saved) ? saved : SCREENS[0].meta.id);
 history.replaceState(null, "", "#/" + startId);
 render(startId);
+
+// ==== Офлайн ====
+// В нативной обёртке service worker не нужен и вреден: файлы и так лежат внутри APK,
+// а его кэш пережил бы обновление приложения и продолжил отдавать старую версию —
+// то самое «правка не доехала», только необратимое.
+const NATIVE_HOST = "appassets.androidplatform.net";
+
+if ("serviceWorker" in navigator && location.hostname !== NATIVE_HOST) {
+  // Оболочка отдаётся из кэша, поэтому после обновления первая загрузка показывает
+  // ещё старую версию, а новый воркер встаёт только следом. Чтобы человек не видел
+  // вчерашнее приложение, перезагружаем страницу один раз, когда управление перешло
+  // к новому воркеру. Первая в жизни установка тоже меняет управление, но там
+  // перезагружать нечего: страница уже свежая. Поэтому смотрим, был ли воркер до неё.
+  const hadController = Boolean(navigator.serviceWorker.controller);
+  let reloading = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (reloading || !hadController) return;
+    reloading = true;
+    location.reload();
+  });
+
+  const register = () => navigator.serviceWorker.register("sw.js").catch(() => {});
+
+  // Подписаться на «load» тут уже поздно: наверху модуля стоит await за справочником,
+  // и к этой строке загрузка страницы обычно успевает закончиться. Подписка на
+  // прошедшее событие не сработает никогда — офлайна не будет, и молча.
+  if (document.readyState === "complete") register();
+  else window.addEventListener("load", register);
+}

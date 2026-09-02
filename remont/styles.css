@@ -441,6 +441,61 @@ input[type="checkbox"] {
   padding: 0 0.2rem;
 }
 
+/* ==== «Как считали» ====
+   Свёрнутые блоки на details: двенадцать материалов подряд читать невозможно,
+   а человеку нужен один — тот, из-за которого он засомневался. */
+
+.method summary {
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.method summary::-webkit-details-marker { display: none; }
+
+.method summary::after {
+  content: "▾";
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}
+
+.method[open] summary::after { content: "▴"; }
+
+.method-body {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.method-body p { margin: 0.5rem 0 0; }
+
+.formulas, .limits {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.formulas li {
+  margin: 0.25rem 0;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.limits {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
+
+.limits li { margin: 0.3rem 0; }
+
 /* ==== Таббар ==== */
 
 .tabbar {
